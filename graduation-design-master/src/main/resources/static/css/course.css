@@ -1,0 +1,57 @@
+
+.course-box{
+	font-size:16px;
+}
+.course-column{
+	color:#666;
+}
+.course-line{
+	margin: 18px;
+}
+.left-column{
+	float: left;
+	width: 50%;
+}
+.right-column{
+	float: left;
+	width: 50%;
+}
+.course-list-name{
+	padding-left: 10px;
+	color:#000;
+}
+
+.course-name{
+	color: #0000FF;
+	font-size: 18px;
+
+}
+.special-box .course-tip{
+	font-size:14px;
+
+}
+.left-column2{
+	float: left;
+}
+.right-column2{
+	float: left;
+	padding-left: 10px;
+	color:#000;
+}
+.course-content{
+	font-size: 14px;
+	color:#000;
+}
+.count-box{
+	color: #000;
+}
+.count-tip{
+	float: left;
+	width: 30%;
+}
+
+.count_num{
+	font-size:18px;
+	font-weight: 600;
+	padding-left: 10px;
+}

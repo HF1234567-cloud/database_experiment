@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.TeacherMapper">
+    <select id="selectCourseListByTeacher" resultType="com.kzl.entity.Course">
+        SELECT s.id,s.courseName,s.collegeId,s.startDate,s.endDate,s.credits,s.optional,s.primaryAmount,s.selected,s.remark,s.academicYear,s.classPlace,s.classDate,s.teachEndDate,c.name collegeName,t.username teacherName
+        FROM course s
+        LEFT JOIN college c ON s.collegeId = c.id
+        LEFT JOIN teacher t ON t.id=s.teacherId
+        WHERE s.teacherId=#{teacherId}
+        AND s.academicYear = #{academicYear}
+    </select>
+
+    <select id="selectStudentListByCourse" resultType="com.kzl.entity.StudentCourseRel">
+        SELECT s.username studentName,c.courseName courseName,c.credits courseCredits,c.academicYear academicYear,sc.isQualified isQualified,sc.state state,c.teachEndDate teachEndDate,s.studentNumber studentNumber
+        FROM student_course_rel sc
+        LEFT JOIN course c ON c.id=sc.courseId
+        LEFT JOIN student s ON s.id = sc.studentId
+        WHERE c.teacherId=#{teacherId}
+        AND c.academicYear = #{academicYear}
+    </select>
+
+    <update id="updateStudentCourseRel" parameterType="com.kzl.entity.StudentCourseRel">
+        UPDATE student_course_rel SET state=#{state},isQualified=#{isQualified},teacherId=#{teacherId}
+        <if test="isQualified == '0'.toString()">,creditsRemark=#{creditsRemark}</if>
+        WHERE id=#{id}
+    </update>
+
+    <select id="selectCourseAcademicYearList" resultType="com.kzl.entity.CourseAcademicYear">
+        SELECT id,academicYear,state
+        FROM course_academic_year
+    </select>
+</mapper>

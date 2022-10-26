@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../static/css/register.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<div class="content">
+    <div class="middle_column">
+        <div class="zh_title">学生选课管理系统</div>
+        <div class="en_title">Student Selection Management System</div>
+        <fieldset class="layui-elem-field" th:switch="${type}">
+            <legend th:case="1">学生账号注册</legend>
+            <legend th:case="2">教师账号注册</legend>
+            <div class="layui-field-box layui-form" th:switch="${type}" action="" lay-filter="example">
+                <div class="layui-form-item" th:case="1">
+                    <label class="layui-form-label">学号:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="studentNumber" id="studentNumber" lay-verify="required" lay-reqtext="学号是必填项，岂能为空？" placeholder="请填写学号" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="layui-form-item" th:case="2">
+                    <label class="layui-form-label">登录名:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="loginName" lay-verify="required" lay-reqtext="登录名是必填项，岂能为空？" placeholder="请填写登录名称" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="姓名是必填项，岂能为空？" placeholder="请填写姓名" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="password" lay-verify="required" lay-reqtext="密码是必填项，岂能为空？" placeholder="请填写密码" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机号:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phone" lay-verify="required" lay-reqtext="手机号是必填项，岂能为空？" placeholder="请填写手机号" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">邮箱:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="email" lay-verify="required" lay-reqtext="邮箱是必填项，岂能为空？" placeholder="请填写邮箱" autocomplete="off" class="layui-input account_input">
+                    </div>
+                </div>
+                <div class="dropdown search_college">
+                    <span class="name_title">选择学院:</span>
+                    <select class="dropbtn" lay-filter="college">
+                        <option value="0">请选择你所属的学院</option>
+                        <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.name}" />
+                    </select>
+                </div>
+                <div class="sub_column">
+                    <button type="button" id="getFromValue" class="layui-btn layui-btn-lg">注册</button>
+                </div>
+            </div>
+        </fieldset>
+        <div class="bottom_tip">
+            <div>已有账号，去<a href="/">登录</a></div>
+            <div class="tip_content">注册信息请如实填写，如果填写错误可能会造成无法选择课程</div>
+        </div>
+    </div>
+</div>
+</body>
+<link rel="stylesheet" href="../static/layui/css/layui.css">
+<script src="../static/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form ,layer = layui.layer ,layedit = layui.layedit ,laydate = layui.laydate;
+
+        var type = [[${type}]];
+
+        var collegeId;
+        //获取选择的学院
+        form.on('select(college)', function (data) {
+            collegeId= data.value;
+        });
+        //表单取值
+        layui.$('#getFromValue').on('click', function(){
+            var data = form.val('example');
+            var studentNumber = data.studentNumber;
+            var loginName = data.loginName;
+            var username = data.username;
+            var password = data.password;
+            var phone = data.phone;
+            var email = data.email;
+            console.log(data)
+            if(type=='1' && (studentNumber===null || studentNumber === undefined || studentNumber === '')){
+                layer.msg("学号不能为空");
+                return;
+            }
+            if(type=='2' && (loginName===null || loginName === undefined || loginName === '')){
+                layer.msg("登录名不能为空");
+                return;
+            }
+            if(username===null || username === undefined || username === ''){
+                layer.msg("姓名不能为空");
+                return;
+            }
+            if(password===null || password === undefined || password === ''){
+                layer.msg("密码不能为空");
+                return;
+            }
+            if(phone===null || phone === undefined || phone === ''){
+                layer.msg("手机号不能为空");
+                return;
+            }
+            if(email===null || email === undefined || email === ''){
+                layer.msg("邮箱不能为空");
+                return;
+            }
+            if(collegeId===null || collegeId === undefined || collegeId === ''){
+                layer.msg("请选择所属学院");
+                return;
+            }
+            data.collegeId = collegeId;
+            data = JSON.stringify(data);
+            layui.jquery.ajax({
+                url:type=='1'?'/studentRegister':'/teacherRegister',
+                method:'post',
+                data:data,
+                contentType: "application/json",
+                traditional: true,
+                dataType: 'json',
+                success:function(res){
+                    if(res.code==200){
+                        layer.msg("注册成功，请登录");
+                        window.location.href='/';
+                    }else{
+                        layer.msg(res.message);
+                        layer.msg("注册出错")
+                    }
+                },
+                error:function (erro) {
+                    layer.msg(res.message);
+                    window.location.href="/register?type="+type;
+                }
+            })
+        });
+    })
+</script>
+</html>

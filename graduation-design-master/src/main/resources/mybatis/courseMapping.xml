@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.CourseMapper">
+
+    <select id="selectCourseList" parameterType="com.kzl.entity.Course" resultType="com.kzl.entity.Course">
+        SELECT s.id,s.courseName,s.collegeId,s.teacherId,s.classPlace,s.classDate,s.startDate,s.endDate,s.credits,s.academicYear,s.teachEndDate,s.optional,s.primaryAmount,s.selected,s.remark,s.state,c.name collegeName,t.username teacherName
+        FROM course s
+        LEFT JOIN college c ON s.collegeId = c.id
+        LEFT JOIN teacher t ON t.id=s.teacherId
+        WHERE 1=1
+        <if test="collegeId!=null and collegeId!=''">AND s.collegeId = #{collegeId}</if>
+        <if test="courseName!=null and courseName!=''">AND s.courseName = #{courseName}</if>
+        ORDER BY s.academicYear DESC
+    </select>
+
+    <update id="updateCourse" parameterType="com.kzl.entity.Course" >
+        UPDATE course
+        <trim prefix="set" suffixOverrides=",">
+            <if test="courseName != null and courseName!=''">courseName=#{courseName},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="credits != null and credits!=''">credits=#{credits},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="optional != null and optional!=''">optional=#{optional},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="classPlace != null and classPlace!=''">classPlace=#{classPlace},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="classDate != null and classDate!=''">classDate=#{classDate},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="remark != null and remark!=''">remark=#{remark},</if>
+        </trim>
+        <trim prefix="set" suffixOverrides=",">
+            <if test="state != null and state!=''">state=#{state},</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <insert id="insertCourse" parameterType="com.kzl.entity.Course">
+        INSERT INTO course(id,courseName,collegeId,teacherId,classPlace,classDate,startDate,endDate,credits,academicYear,teachEndDate,optional,primaryAmount,selected,remark,state)
+        VALUES(#{id},#{courseName},#{collegeId},#{teacherId},#{classPlace},#{classDate},#{startDate},#{endDate},#{credits},#{academicYear},#{teachEndDate},#{optional},#{primaryAmount},#{selected},#{remark},#{state})
+    </insert>
+
+    <select id="selectCourseAcademicYearList" resultType="com.kzl.entity.CourseAcademicYear">
+        SELECT id,academicYear,state
+        FROM course_academic_year
+    </select>
+
+    <update id="updateAcademicYears">
+        UPDATE course_academic_year SET state='0'
+    </update>
+    <update id="updateAcademicYearsById" parameterType="com.kzl.entity.CourseAcademicYear">
+        UPDATE course_academic_year SET state='1' WHERE id=#{id}
+    </update>
+
+    <insert id="insertAcademicYears" parameterType="com.kzl.entity.CourseAcademicYear">
+        INSERT INTO course_academic_year(id,academicYear,state)
+        VALUES(#{id},#{academicYear},#{state})
+    </insert>
+
+
+    <select id="selectCourseByEndDate" parameterType="com.kzl.entity.Course" resultType="com.kzl.entity.Course">
+        SELECT id FROM course
+        WHERE id=#{id}
+        AND #{endDate} &lt; endDate
+    </select>
+
+    <select id="selectCurrentCourseAcademicYear" resultType="com.kzl.entity.CourseAcademicYear">
+        SELECT id,academicYear,state
+        FROM course_academic_year
+        WHERE state='1'
+    </select>
+
+    <select id="selectTeacherList" resultType="java.util.HashMap">
+        SELECT id,username,state
+        FROM teacher
+        WHERE state='1'
+    </select>
+</mapper>

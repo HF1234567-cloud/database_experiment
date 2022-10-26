@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>选课统计</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link href="../../static/css/course.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="index_cloum course-box">
+                <blockquote class="layui-elem-quote">
+                    选课统计
+                </blockquote>
+
+                <blockquote class="layui-elem-quote course-column count-box">
+                    <div>已完成课程统计</div>
+                    <hr>
+                    <div class="count-tip">当前已选课程门数:<span class="count_num">[[${complete['courseNum']}]]</span></div>
+                    <div class="count-tip">当前已选学分:<span class="count_num">[[${complete['creditsNum']}]]</span>分</div>
+                    <div class="clear"></div>
+                </blockquote>
+
+                <blockquote class="layui-elem-quote course-column count-box">
+                    <div>正在进行课程统计</div>
+                    <hr>
+                    <div class="count-tip">当前已选课程门数:<span class="count_num">[[${unfinished['courseNum']}]]</span></div>
+                    <div class="count-tip">当前已选学分:<span class="count_num">[[${unfinished['creditsNum']}]]</span>分</div>
+                    <div class="clear"></div>
+                </blockquote>
+
+                <blockquote class="layui-elem-quote course-column count-box">
+                    <div>已选课程统计</div>
+                    <hr>
+                    <div class="count-tip">当前已选课程门数:<span class="count_num">[[${selected['courseNum']}]]</span></div>
+                    <div class="count-tip">当前已选学分:<span class="count_num">[[${selected['creditsNum']}]]</span>分</div>
+                    <div class="clear"></div>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/layui/layui.all.js"/>
+<script>
+    layui.use(['tree', 'util','element'], function(){
+        var layer = layui.layer
+            ,element = layui.element;
+
+        //监听导航点击
+        element.on('nav(demo)', function(elem){
+            console.log(elem)
+            // layer.msg(elem.text());
+        });
+    });
+</script>
+</html>

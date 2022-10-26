@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>选课学生管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+
+            <div class="teacher_column">
+                <div class="teacher_top">
+                    选修课程的学生信息列表查询 <hr>
+                </div>
+                <div class="search_top">
+                    <div class="dropdown search_college2">
+                        <span class="name_title">选择学年:</span>
+                        <select class="dropbtn" id="tag" name="tag">
+                            <option >请选择学年</option>
+                            <option value="1">2020年下半学年</option>
+                            <option value="2">2020年上半学年</option>
+                            <option value="3">2019年下半学年</option>
+                            <option value="3">2019年上半学年</option>
+                        </select>
+                    </div>
+                    <div class="dropdown search_college2">
+                        <span class="name_title">选择课程:</span>
+                        <select class="dropbtn" id="tag2" name="tag">
+                            <option >请选择课程</option>
+                            <option value="1">音乐鉴赏</option>
+                            <option value="2">音乐鉴赏2</option>
+                            <option value="3">音乐鉴赏3</option>
+                            <option value="3">音乐鉴赏4</option>
+                        </select>
+                    </div>
+                    <div class="search_name2">
+                        <span class="name_title">学生姓名:</span>
+                        <input type="text" name="username" id="username"  autocomplete="off" placeholder="请输入学生姓名" class="search_input">
+                    </div>
+                    <div class="search_btn2">
+                        <button type="button" class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="teacher_content">
+                    <blockquote class="layui-elem-quote">
+
+                        <table class="layui-hide" id="teacher" lay-filter="teacher"></table>
+                    </blockquote>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script></script>
+<script>
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#teacher',
+            url:'/teacher/studentInfoInCourse',
+            cols: [
+                [
+                    {field:'studentNumber', title:'学号'},
+                    {field:'studentName', title:'学生姓名'},
+                    {field:'courseName', title:'课程名'},
+                    {field:'academicYear', title: '学年'},
+                    {field:'teachEndDate', title: '课程结束时间'},
+                ]
+            ],
+            id: 'teacherReload',
+        });
+
+    });
+</script>
+</body>
+</html>

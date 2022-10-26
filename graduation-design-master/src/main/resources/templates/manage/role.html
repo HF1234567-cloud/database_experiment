@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>角色管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="college_cloum">
+                <div class="college_title">角色管理</div>
+                <div class="college_add"><button type="button" class="layui-btn" onclick="addRoleBtn()">添加角色</button></div>
+                <hr>
+                <div>
+                    <blockquote class="layui-elem-quote">
+                        <table class="layui-hide" id="role" lay-filter="role"></table>
+                    </blockquote>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="menu_box" id="menu_box">
+        <div class="role_menu_manage">
+            <div class="role_menu_manage_title">角色对应的菜单管理</div>
+            <hr>
+            <div class="role_name_input">
+                <div class="role_title">
+                    <label class="layui-form-label">角色名称:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="roleName" id="roleName" lay-verify="title" autocomplete="off" placeholder="请输入角色名称" class="layui-input" >
+                    </div>
+                </div>
+            </div>
+            <fieldset class="layui-elem-field">
+                <legend class="role_menu_rel_name">菜单分配</legend>
+                <div class="layui-field-box">
+                    <div id="menu-list" class="demo-tree-more"></div>
+                </div>
+            </fieldset>
+            <div class="role_manage_btn">
+                <button type="button" class="layui-btn determine_btn" onclick="indeterminate()">确定</button>
+                <button type="button" class="layui-btn layui-btn-primary cancel_btn" onclick="cancelBtn()">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../static/layui/layui.all.js"/>
+</body>
+<script></script>
+<script>
+    layui.use(['table', 'layer','tree'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery,
+            tree = layui.tree;
+        var roleId;
+        var roleName;
+
+        //菜单树
+        showRoleTree = function () {
+            tree.render({
+                elem: '#menu-list',
+                data: getData(),
+                showCheckbox: true,  //是否显示复选框
+                id: 'menuData',
+                isJump: false ,//是否允许点击节点时弹出新窗口跳转
+                showLine: false  //是否开启连接线
+            });
+        };
+
+        //获取菜单列表数据
+        function getData(){
+            var data = {
+                'id': roleId
+            };
+            var result = [];
+            $.ajax({
+                url: "/manage/getMenuList",
+                type: "post",
+                data: data,
+                async:false,
+                success: function(res){
+                    console.log(res);
+                    result = res.data;
+                }
+            });
+            return result;
+        };
+
+        //角色表格
+        var tableIns = table.render({
+            elem: '#role',
+            url:'/manage/roleList',
+            cols: [
+                [
+                    {field:'name', title:'角色名称', edit: 'text'},
+                    {field:'createDate', title:'创建时间'},
+                    {templet: complain1, title: '菜单', align:'center'},
+                    {templet: complain2, title: '是否禁用', align:'center'}
+                ]
+            ]
+        });
+        function complain1(d){
+            return [
+                '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="roleMenuRelShow(&quot;'+ d.id + '&quot;,&quot;'+ d.name+'&quot;)">菜单列表</button>'
+            ]
+                .join('');
+        };
+
+        //是否禁用按钮
+        function complain2(d){
+            var returnData;
+            if(d.state == "1"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+        };
+
+        //显示菜单列表
+        window.roleMenuRelShow = function (id,name) {
+            roleId = id;
+            roleName= name;
+            showRoleTree();
+            document.getElementById("roleName").value = roleName;
+            document.getElementById("menu_box").style.display="block";
+        };
+
+        //点击确定时修改角色
+        window.indeterminate = function(){
+            //获取修改的角色名和id
+            var roleName = document.getElementById("roleName").value;
+            var id = roleId;
+            //获取菜单数据
+            var treeData =tree.getChecked('menuData');
+            for(var i=0; i<treeData.length; i++){
+                treeData[i].menus=treeData[i].children;
+            }
+            if(id != null){
+                updateRole(id,roleName,null,treeData);
+            }else{
+                addRole(roleName,treeData)
+            }
+            document.getElementById("menu_box").style.display="none";
+        };
+
+
+        //取消
+        window.cancelBtn = function(){
+            roleId = null;
+            roleName= null;
+            document.getElementById("menu_box").style.display="none";
+        };
+
+        //添加角色
+        window.addRoleBtn = function () {
+            roleId = null;
+            showRoleTree();
+            document.getElementById("menu_box").style.display="block";
+            document.getElementById("roleName").value = null;
+        };
+
+        //修改角色状态
+        window.updateRoleState = function (id,state) {
+            updateRole(id,'',state,null);
+        };
+
+        //修改角色
+        function updateRole(id,name,state,menuList) {
+            var data = {
+                'id': id,
+                'name': name,
+                'state': state,
+                'menus': menuList
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateRole',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        //添加角色
+        function addRole(name,menuList) {
+            console.log("添加角色 gogogo")
+            var data = {
+                'name': name,
+                'menus': menuList
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/addRole',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        }
+    });
+</script>
+</html>

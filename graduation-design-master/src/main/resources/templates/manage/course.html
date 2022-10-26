@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>课程管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+
+            <div class="teacher_column">
+                <div class="teacher_top">
+                    <!--课程管理 <hr>-->
+                    <div class="college_title">课程管理</div>
+                    <div class="college_add"><button type="button" class="layui-btn" onclick="addCourse()">添加课程</button></div>
+                    <div class="college_add course_academic_year_tip">当前可以选择的课程学年:2020下半学年</div>
+                    <hr>
+                </div>
+                <div class="search_top">
+                    <div class="dropdown search_college">
+                        <span class="name_title">选择学院:</span>
+                        <select class="dropbtn" id="tag" name="tag">
+                            <option value="0">请选择学院</option>
+                            <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.name}" />
+                        </select>
+                    </div>
+
+                    <div class="search_name">
+                        <span class="name_title">课程名称:</span>
+                        <input type="text" name="courseName" id="courseName"  autocomplete="off" placeholder="请输入课程/支持模糊查询" class="search_input">
+                    </div>
+                    <div class="search_btn">
+                        <button type="button" class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="teacher_content">
+                    <blockquote class="layui-elem-quote">
+                        <table class="layui-hide" id="course" lay-filter="course"></table>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script></script>
+<script>
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#course',
+            url:'/course/courseList',
+            cols: [
+                [
+                    {field:'courseName', title:'课程名称', edit: 'text'},
+                    {field:'collegeName', title:'学院名称'},
+                    {field:'credits', title:'学分', edit: 'number',width:70},
+                    {field:'academicYear', title: '学年',width:80},
+                    {field:'teacherName', title:'上课教师',width:90},
+                    {field:'optional', title: '可选人数', edit: 'number',width:90},
+                    {field:'classPlace', title: '上课地点', edit: 'text'},
+                    {field:'classDate', title: '上课时间', edit: 'text'},
+                    {field:'remark', title: '课程说明', edit: 'text'},
+                    {templet: complain, title: '删除课程', align:'center'},
+
+                ]
+            ],
+            id: 'courseReload',
+        });
+
+        //删除课程
+        function complain(d){
+            var returnData;
+            if(d.state == "1"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">删除</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center;" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">已删除</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+
+        };
+
+        //修改状态
+        window.updateRoleState = function(id,state){
+            if(state == '0'){
+                layer.msg("课程已删除！！！");
+                return;
+            }
+            var data = {
+                'id': id,
+                'state': '0',
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/course/updateCourse',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+
+        var active = {
+            reload: function(){
+                var courseName = $('#courseName');
+                var collegeId = $('select[name="tag"] option:selected').val();
+                //执行重载
+                table.reload('courseReload', {
+                    where: {
+                        'courseName': courseName.val(),
+                        'collegeId':collegeId
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.teacher_column .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //监听-学院列表编辑
+        table.on('edit(course)', function(obj){
+            var value = obj.value,
+                data = obj.data,
+                field = obj.field;
+            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+            var value = obj.value;
+            var updateKey = obj.field;
+            var college = obj.data;
+            var data = {
+                'id': college.id
+            };
+            data[updateKey]=value
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/course/updateCourse',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+
+        });
+        window.addCourse = function () {
+            window.location.href="/course/forwardAdd";
+        };
+
+    });
+</script>
+</body>
+</html>

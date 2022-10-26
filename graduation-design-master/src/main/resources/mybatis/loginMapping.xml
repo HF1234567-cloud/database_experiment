@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.LoginMapper">
+
+    <select id="selectManageUser" parameterType="com.kzl.entity.ManageUser" resultType="com.kzl.entity.ManageUser">
+        SELECT u.id,u.loginName,u.username,u.password,u.roleId,u.createDate,r.name roleName
+        FROM manage_user u
+        LEFT JOIN role r ON u.roleId=r.id
+        WHERE u.state = '1'
+        AND u.loginName = #{loginName}
+        AND u.password = #{password}
+    </select>
+
+    <select id="selectStudent" parameterType="com.kzl.entity.Student" resultType="com.kzl.entity.Student">
+        SELECT u.id,u.studentNumber,u.username,u.password,u.roleId,u.createDate,u.collegeId,r.name roleName
+        FROM student u
+        LEFT JOIN role r ON u.roleId=r.id
+        WHERE u.state = '1'
+        AND u.studentNumber = #{studentNumber}
+        AND u.password = #{password}
+    </select>
+
+    <select id="selectTeacher" parameterType="com.kzl.entity.Teacher" resultType="com.kzl.entity.Teacher">
+        SELECT u.id,u.loginName,u.username,u.password,u.roleId,u.createDate,r.name roleName
+        FROM teacher u
+        LEFT JOIN role r ON u.roleId=r.id
+        WHERE u.state = '1'
+        AND u.loginName = #{loginName}
+        AND u.password = #{password}
+    </select>
+</mapper>

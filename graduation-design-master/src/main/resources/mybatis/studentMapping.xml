@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.StudentMapper">
+    <select id="selectCourseList" resultType="com.kzl.entity.Course">
+        SELECT s.id,s.courseName,s.collegeId,s.startDate,s.endDate,s.credits,s.optional,s.primaryAmount,s.selected,s.remark,s.academicYear,c.name collegeName,t.username teacherName
+        FROM course s
+        LEFT JOIN college c ON s.collegeId = c.id
+        LEFT JOIN teacher t ON t.id=s.teacherId
+        WHERE s.collegeId = #{collegeId}
+        AND s.academicYear = #{courseAcademicYear}
+    </select>
+
+    <select id="selectStudentCourseRel" resultType="com.kzl.entity.StudentCourseRel">
+        SELECT id,studentId,courseId,teacherId,isQualified,creditsRemark,state
+        FROM student_course_rel
+        WHERE courseId=#{courseId}
+        AND studentId=#{studentId}
+    </select>
+
+    <insert id="insertStudentCourseRel" parameterType="com.kzl.entity.StudentCourseRel">
+        INSERT INTO student_course_rel(id,studentId,courseId,teacherId,isQualified,creditsRemark,state)
+        VALUES(#{id},#{studentId},#{courseId},#{teacherId},#{isQualified},#{creditsRemark},#{state})
+    </insert>
+
+    <delete id="deleteStudentCourseRel" parameterType="com.kzl.entity.StudentCourseRel">
+        DELETE FROM student_course_rel WHERE studentId = #{studentId} AND courseId = #{courseId}
+    </delete>
+
+    <select id="selectCourseListByStudent" resultType="com.kzl.entity.Course">
+        SELECT s.id,s.courseName,s.collegeId,s.startDate,s.endDate,s.credits,s.optional,s.primaryAmount,s.selected,s.remark,s.academicYear,s.classPlace,s.classDate,c.name collegeName,t.username teacherName
+        FROM student_course_rel sc
+        LEFT JOIN course s ON sc.courseId=s.id
+        LEFT JOIN college c ON s.collegeId = c.id
+        LEFT JOIN teacher t ON t.id=s.teacherId
+        WHERE sc.studentId=#{studentId}
+        AND s.academicYear = #{courseAcademicYear}
+    </select>
+
+    <select id="selectCourseAcademicYearByState" resultType="com.kzl.entity.CourseAcademicYear">
+        SELECT id,academicYear,state
+        FROM course_academic_year
+        WHERE state='1'
+    </select>
+
+    <select id="selectCompleteCourseCount" parameterType="com.kzl.entity.Student" resultType="java.util.HashMap">
+        SELECT count(1) courseNum,
+        (CASE WHEN sum(c.credits)IS NULL THEN 0 ELSE sum(c.credits) END) creditsNum
+        FROM student_course_rel sr
+        LEFT JOIN course c ON sr.courseId=c.id
+        WHERE sr.state='1'
+        AND sr.studentId=#{id}
+    </select>
+
+    <select id="selectUnfinishedCourseCount" parameterType="com.kzl.entity.Student" resultType="java.util.HashMap">
+        SELECT count(1) courseNum,
+        (CASE WHEN sum(c.credits)IS NULL THEN 0 ELSE sum(c.credits) END) creditsNum
+        FROM student_course_rel sr
+        LEFT JOIN course c ON sr.courseId=c.id
+        WHERE sr.studentId=#{id}
+        AND sr.state='0'
+    </select>
+
+    <select id="selectSelectedCourseCount" parameterType="com.kzl.entity.Student" resultType="java.util.HashMap">
+        SELECT count(1) courseNum,
+        (CASE WHEN sum(c.credits)IS NULL THEN 0 ELSE sum(c.credits) END) creditsNum
+        FROM student_course_rel sr
+        LEFT JOIN course c ON sr.courseId=c.id
+        WHERE sr.studentId=#{id}
+    </select>
+
+    <select id="selectCourseByPeriodTime" resultType="com.kzl.entity.Course">
+        SELECT id
+        FROM course
+        WHERE id=#{courseId}
+        AND #{nowTime} &gt; startDate
+        AND #{nowTime} &lt; endDate
+    </select>
+
+    <select id="selectCourseById" resultType="com.kzl.entity.Course">
+        SELECT id, optional, selected
+        FROM course
+        WHERE id=#{courseId}
+    </select>
+
+    <update id="updateCourse"  parameterType="com.kzl.entity.Course">
+        UPDATE course SET selected = selected + #{useNumber}
+        WHERE id=#{id}
+    </update>
+</mapper>

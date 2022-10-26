@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>学院管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="college_cloum">
+                <div class="college_title">学院管理</div>
+                <div class="college_add"><button type="button" class="layui-btn" onclick="notice()">添加学院</button></div>
+                <hr>
+                <div>
+                    <blockquote class="layui-elem-quote">
+                        <table class="layui-hide" id="college" lay-filter="college"></table>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../static/layui/layui.all.js"/>
+</body>
+<script></script>
+<script>
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#college'
+            ,url:'/manage/collegeList'
+            ,cols: [
+                [
+                    {field:'name', title:'学院名称', edit: 'text'},
+                    {field:'teacherNum', title:'学院下教师数量'},
+                    {field:'studentNum', title: '学院下学生数量'},
+                    {field:'createDate', title: '创建时间'},
+                    {templet: complain, title: '是否禁用', align:'center'}
+                ]
+            ]
+        });
+
+        //是否禁用按钮
+        function complain(d){
+            var returnData;
+            if(d.state == "1"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+        };
+
+        //修改学院使用状态
+        window.updateCollegeState = function (id,state) {
+            var data = {
+                'id': id,
+                'state': state
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateCollege',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        //监听-学院列表编辑
+        table.on('edit(college)', function(obj){
+            var value = obj.value,
+                data = obj.data,
+                field = obj.field;
+            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+            var value = obj.value;
+            var updateKey = obj.field;
+            var college = obj.data;
+            var data = {
+                'id': college.id
+            };
+            data[updateKey]=value
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateCollege',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        layer.closeAll()
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        });
+
+        //弹出框-添加学院
+        window.notice = function(parentId){
+            layer.open({
+                type: 1,
+                title: "添加一级菜单",
+                closeBtn: false,
+                area: '500px;',
+                shade: 0.8,
+                id: 'LAY_layuipro', //设定一个id，防止重复弹出
+                btn: ['添加学院', '取消添加'],
+                btnAlign: 'c',
+                moveType: 1, //拖拽模式，0或者1
+                content: '<div class="layui-form-item" style="margin-top: 25px;">\n' +
+                    '  <label class="layui-form-label">学院名称:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '    <input type="text" name="name" id="name" lay-verify="required" placeholder="学院名称" autocomplete="off" class="layui-input account_input">\n' +
+                    '  </div>\n' +
+                    '</div>',
+                yes: function(){
+                    var name = document.getElementById("name").value;
+                    addCollege(name);
+                },
+                btn2: function(){
+                    layer.closeAll();
+                }
+            });
+        };
+        window.addCollege = function (name) {
+            var data = { 'name':name };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/addCollege',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        layer.closeAll()
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        }
+    });
+</script>
+</html>

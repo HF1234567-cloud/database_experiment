@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.RegisterMapper">
+
+    <insert id="insertTeacher" parameterType="com.kzl.entity.Teacher">
+        INSERT INTO teacher(id,loginName,username,password,phone,email,roleId,collegeId,createDate,state)
+        VALUES(#{id},#{loginName},#{username},#{password},#{phone},#{email},#{roleId},#{collegeId},#{createDate},#{state})
+    </insert>
+
+    <insert id="insertStudent" parameterType="com.kzl.entity.Student">
+        INSERT INTO student(id,studentNumber,username,password,phone,email,roleId,collegeId,createDate,state)
+        VALUES(#{id},#{studentNumber},#{username},#{password},#{phone},#{email},#{roleId},#{collegeId},#{createDate},#{state})
+    </insert>
+
+    <select id="selectStudentByStudentNumber" parameterType="com.kzl.entity.Student"  resultType="com.kzl.entity.Student">
+        SELECT id FROM student
+        WHERE studentNumber=#{studentNumber}
+    </select>
+
+
+    <select id="selectTeacherByLoginName" parameterType="com.kzl.entity.Teacher"  resultType="com.kzl.entity.Teacher">
+        SELECT id FROM teacher
+        WHERE loginName=#{loginName}
+    </select>
+
+    <select id="selectColleageList" resultType="java.util.HashMap">
+        SELECT id,name
+        FROM college
+        WHERE state='1'
+    </select>
+</mapper>

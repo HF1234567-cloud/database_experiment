@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>已选课程</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link href="../../static/css/course.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="index_cloum course-box">
+                <blockquote class="layui-elem-quote">
+                    [[${academicYear}]] 选课列表
+                </blockquote>
+
+                <blockquote class="layui-elem-quote course-column" th:each="course : ${courses}">
+                    <div>课程名称:<span class="course-list-name course-name">[[${course.courseName}]]</span> </div>
+                    <hr>
+                    <div class="course-line">
+                        <div class="left-column">
+                            学院:<span class="course-list-name">[[${course.collegeName}]]</span>
+                        </div>
+                        <div class="right-column">
+                            上课教师:<span class="course-list-name">[[${course.teacherName}]]</span>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="course-line">
+                        <div class="left-column">
+                            可选人数:<span class="course-list-name">[[${course.optional}]]人</span>
+                        </div>
+                        <div class="right-column">
+                            课程学分:<span class="course-list-name">[[${course.credits}]]学分</span>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="course-line">
+                        <div class="left-column">
+                            <div class="left-column2">
+                                上课时间:
+                            </div>
+                            <div class="right-column2" th:id="'date'+${course.id}"></div>
+                        </div>
+                        <div class="right-column">
+                            <div class="left-column2">
+                                上课地点:
+                            </div>
+                            <div class="right-column2" th:id="'place'+${course.id}"></div>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="course-line">
+                        <fieldset class="layui-elem-field special-box">
+                            <legend class="course-tip">课程说明</legend>
+                            <div class="layui-field-box course-content" th:id="'content'+${course.id}"></div>
+                        </fieldset>
+                    </div>
+                </blockquote>
+
+                <blockquote class="layui-elem-quote course-column count-box">
+                    <div>课程统计</div>
+                    <hr>
+                    <div class="count-tip">当前已选课程数:<span class="count_num">[[${courseCount}]]</span></div>
+                    <div class="count-tip">当前已选学分:<span class="count_num">[[${creditsCount}]]</span>分</div>
+                    <div class="count-tip"><a >历史选课查询</a></div>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/layui/layui.all.js"></script>
+<script th:inline="javascript">
+    layui.use('layer',function(){
+        var layer = layui.layer,
+            $ = layui.jquery;
+
+        layer.ready(function(){
+            var courses = [[${courses}]];
+            for(var i=0;i<courses.length;i++){
+                var remark = courses[i].remark;
+                var classDate = courses[i].classDate;
+                var classPlace = courses[i].classPlace;
+                var courseId = courses[i].id;
+                // 上课时间重新赋值
+                document.getElementById('date'+courseId).innerHTML = classDate;
+                // 上课地点重新赋值
+                document.getElementById('place'+courseId).innerHTML = classPlace;
+                // 课程说明重新赋值
+                document.getElementById('content'+courseId).innerHTML = remark;
+            }
+        });
+    });
+</script>
+</html>

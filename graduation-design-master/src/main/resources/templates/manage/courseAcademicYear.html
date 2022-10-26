@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>课程学年管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="index_cloum">
+                <blockquote class="layui-elem-quote">
+                    选择课程学年
+                </blockquote>
+                <blockquote class="layui-elem-quote">
+                    <div class="academic_year_check">
+                        <div class="dropdown input_box check_box">
+                            <div class="name_title">选择学年:</div>
+                            <select class="dropbtn" id="academicYears" name="academicYears" >
+                                <option th:each="academicYears : ${courseAcademicYears}" th:value="${academicYears.id}" th:text="${academicYears.academicYear}" th:selected="${academicYears.state eq '1'}"/>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="academic_year_btn">
+                        <button type="button" class="layui-btn" onclick="checkAcademicYears()">确定</button>
+                    </div>
+                    <div class="clear"></div>
+                </blockquote>
+                <blockquote class="layui-elem-quote">
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="addAcademicYears()">添加学年</button>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/layui/layui.all.js"></script>
+<script>
+    layui.use(['table', 'layer', 'laydate'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        //修改学年
+        window.checkAcademicYears = function () {
+           var academicYears = $('select[name="academicYears"] option:selected').val();
+           var data = {
+                'id': academicYears,
+           };
+           data = JSON.stringify(data);
+           $.ajax({
+                url: '/course/updateAcademicYears',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        window.location.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        //添加学年
+        window.addAcademicYears = function () {
+            console.log("academicYears");
+            layer.open({
+                type: 1,
+                title: "添加学年",
+                closeBtn: false,
+                area: '500px;',
+                shade: 0.8,
+                id: 'LAY_layuipro', //设定一个id，防止重复弹出
+                btn: ['添加学年', '取消添加'],
+                btnAlign: 'c',
+                moveType: 1, //拖拽模式，0或者1
+                content: '<div class="layui-form-item" style="margin-top: 25px;">\n' +
+                    '  <label class="layui-form-label">学年:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '    <input type="text" name="name" id="name" lay-verify="required" placeholder="设置学年" autocomplete="off" class="layui-input account_input">\n' +
+                    '  </div>\n' +
+                    '</div>',
+                yes: function(){
+                    var name = document.getElementById("name").value;
+                    addCourseAcademicYears(name);
+                },
+                btn2: function(){
+                    layer.closeAll();
+                }
+            });
+        };
+
+
+        window.addCourseAcademicYears = function (name) {
+            var data = { 'academicYear':name };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/course/addAcademicYears',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        layer.closeAll()
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        }
+
+    });
+</script>
+</html>

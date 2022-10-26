@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.ManageMapper">
+
+    <select id="selectFirstMenuByRoleId" resultType="com.kzl.entity.Menu">
+        SELECT m.id,m.name,m.parentId,m.createDate,m.createId,m.updateDate,m.sort,m.href,m.remark
+        FROM menu m
+        LEFT JOIN role_menu_rel rm ON m.id = rm.menuId
+        WHERE rm.roleId=#{roleId}
+        AND m.parentId=#{parentId}
+        AND m.state = '1'
+        ORDER BY m.sort
+    </select>
+
+    <select id="selectInformationByRoleId" resultType="com.kzl.entity.Information">
+        SELECT id,title,content,publishDate
+        FROM information
+        WHERE roleId = #{roleId}
+    </select>
+
+    <select id="selectMenuList" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT id,name,parentId,sort,href,state,remark
+        FROM menu
+    </select>
+
+    <insert id="insertMenu" parameterType="com.kzl.entity.Menu">
+        INSERT INTO menu(id,name,parentId,createDate,createId,updateDate,sort,href,state,remark)
+        VALUES(#{id},#{name},#{parentId},#{createDate},#{createId},#{updateDate},#{sort},#{href},#{state},#{remark})
+    </insert>
+
+    <update id="updateMenu" parameterType="com.kzl.entity.Menu">
+        UPDATE menu SET updateDate = #{updateDate}
+        <if test="state!=null and state!=''">,state = #{state}</if>
+        <if test="name!=null and name!=''">,name = #{name}</if>
+        <if test="sort!=0">,sort = #{sort}</if>
+        <if test="href!=null and href!=''">,href = #{href}</if>
+        <if test="remark!=null and remark!=''">,remark = #{remark}</if>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateCollege" parameterType="com.kzl.entity.College">
+        UPDATE college SET updateDate = #{updateDate}
+        <if test="state!=null and state!=''">,state = #{state}</if>
+        <if test="name!=null and name!=''">,name = #{name}</if>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertCollege" parameterType="com.kzl.entity.College">
+        INSERT INTO college(id,name,teacherNum,studentNum,state,createDate,updateDate)
+        VALUES(#{id},#{name},#{teacherNum},#{studentNum},#{state},#{createDate},#{updateDate})
+    </insert>
+
+    <select id="selectCollegeList" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT id,name,teacherNum,studentNum,state,createDate
+        FROM college
+    </select>
+
+    <select id="selectInformationList" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT i.id id, i.title title, i.content content, i.publishDate publishDate, i.roleId roleId, r.name roleName
+        FROM information i
+        LEFT JOIN role r ON r.id = i.roleId
+    </select>
+
+
+    <select id="selectInformationById" resultType="com.kzl.entity.Information">
+        SELECT i.id id, i.title title, i.content content, i.publishDate publishDate, i.roleId roleId, r.name roleName
+        FROM information i
+        LEFT JOIN role r ON r.id = i.roleId
+        WHERE i.id=#{id}
+    </select>
+
+    <update id="updateInformation" parameterType="com.kzl.entity.Information">
+        UPDATE information SET title=#{title}, content=#{content}
+        WHERE id=#{id}
+    </update>
+
+    <insert id="addInformation" parameterType="com.kzl.entity.Information">
+        INSERT INTO information(id,title,content,publishDate,roleId)
+        VALUES(#{id},#{title},#{content},#{publishDate},#{roleId})
+    </insert>
+
+    <select id="selectTeacherList" parameterType="com.kzl.entity.Teacher" resultType="com.kzl.entity.Teacher">
+        SELECT t.id,t.loginName,t.username,t.phone,t.email,t.roleId,t.collegeId,t.createDate,t.state,c.name collegeName
+        FROM teacher t LEFT JOIN college c ON t.collegeId = c.id
+        WHERE 1=1
+        <if test="collegeId!=null and collegeId!=''">AND t.collegeId = #{collegeId}</if>
+        <if test="username!=null and username!=''">AND t.username = #{username}</if>
+    </select>
+
+
+    <update id="updateTeacher" parameterType="com.kzl.entity.Teacher">
+        UPDATE teacher
+        <trim prefix="set" suffixOverrides=",">
+            <if test="state != null and state!=''">state=#{state},</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <select id="selectStudentList" parameterType="com.kzl.entity.Student" resultType="com.kzl.entity.Student">
+        SELECT s.id,s.studentNumber,s.username,s.phone,s.email,s.roleId,s.collegeId,s.createDate,s.state,c.name collegeName
+        FROM student s LEFT JOIN college c ON s.collegeId = c.id
+        WHERE 1=1
+        <if test="collegeId!=null and collegeId!=''">AND s.collegeId = #{collegeId}</if>
+        <if test="username!=null and username!=''">AND s.username = #{username}</if>
+    </select>
+
+    <update id="updateStudent" parameterType="com.kzl.entity.Student" >
+        UPDATE student
+        <trim prefix="set" suffixOverrides=",">
+            <if test="state != null and state!=''">state=#{state},</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <select id="selectMenuByRoleId" parameterType="java.lang.String" resultType="com.kzl.entity.Menu">
+        SELECT m.id,m.name,m.parentId,m.createDate,m.createId,m.updateDate,m.sort,m.href,m.remark
+        FROM menu m
+        LEFT JOIN role_menu_rel rm ON m.id = rm.menuId
+        WHERE rm.roleId=#{roleId}
+        AND m.state = '1'
+        ORDER BY m.sort
+    </select>
+
+    <select id="selectAllMenuList" resultType="com.kzl.entity.Menu">
+        SELECT m.id,m.name,m.parentId,m.createDate,m.createId,m.updateDate,m.sort,m.href,m.remark
+        FROM menu m
+        WHERE m.state = '1'
+        ORDER BY m.sort
+    </select>
+
+    <select id="selectRoleList" resultType="com.kzl.entity.Role">
+        SELECT id,name,createDate,state
+        FROM role
+    </select>
+
+    <update id="updateRole" parameterType="com.kzl.entity.Role">
+        UPDATE role
+        <trim prefix="set" suffixOverrides=",">
+            <if test="state != null and state!=''">state=#{state}</if>
+            <if test="name != null and name!=''">name=#{name}</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteRoleMenuRelByRoleId">
+        DELETE FROM role_menu_rel
+        WHERE roleId=#{roleId}
+    </delete>
+
+    <insert id="addRoleMenuRel" parameterType="com.kzl.entity.RoleMenuRel">
+      INSERT INTO role_menu_rel(id,roleId,menuId)
+      VALUES(#{id},#{roleId},#{menuId})
+    </insert>
+    <insert id="insertRole" parameterType="com.kzl.entity.Role">
+      INSERT INTO role(id,name,createDate,state)
+      VALUES(#{id},#{name},#{createDate},#{state})
+    </insert>
+</mapper>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>成绩管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+
+            <div class="teacher_column">
+                <div class="teacher_top">
+                    成绩管理 <hr>
+                </div>
+                <div class="search_top">
+                    <div class="dropdown search_college2">
+                        <span class="name_title">选择学年:</span>
+                        <select class="dropbtn" id="tag" name="tag">
+                            <option >请选择学年</option>
+                            <option value="1">2020年下半学年</option>
+                            <option value="2">2020年上半学年</option>
+                            <option value="3">2019年下半学年</option>
+                            <option value="3">2019年上半学年</option>
+                        </select>
+                    </div>
+                    <div class="dropdown search_college2">
+                        <span class="name_title">选择课程:</span>
+                        <select class="dropbtn" id="tag2" name="tag">
+                            <option >请选择课程</option>
+                            <option value="1">音乐鉴赏</option>
+                            <option value="2">音乐鉴赏2</option>
+                            <option value="3">音乐鉴赏3</option>
+                            <option value="3">音乐鉴赏4</option>
+                        </select>
+                    </div>
+                    <div class="search_name2">
+                        <span class="name_title">学生姓名:</span>
+                        <input type="text" name="username" id="username"  autocomplete="off" placeholder="请输入学生姓名" class="search_input">
+                    </div>
+                    <div class="search_btn2">
+                        <button type="button" class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="teacher_content">
+                    <blockquote class="layui-elem-quote">
+
+                        <table class="layui-hide" id="teacher" lay-filter="teacher"></table>
+                    </blockquote>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"></script>
+<script th:inline="javascript">
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#teacher',
+            url:'/teacher/courseList',
+            cols: [
+                [
+                    {field:'studentName', title:'学生姓名'},
+                    {field:'courseName', title:'课程名'},
+                    {field:'courseCredits', title:'课程学分'},
+                    {field:'academicYear', title: '学年'},
+                    {templet: complain, title: '成绩是否合格', align:'center'},
+                    {templet: complain2, title: '操作', align:'center'},
+                ]
+            ],
+            id: 'teacherReload',
+        });
+
+        function complain(d){
+            var text;
+            if(d.state == "0" ){
+                text = "未评价";
+            }else{
+                if(d.isQualified == "0"){
+                    text = "不合格";
+                }else{
+                    text = "成绩合格";
+                }
+            }
+            return [
+                '<div style="text-align: center">'+text+'</div>',
+            ]
+                .join('');
+        };
+
+        //是否禁用按钮
+        function complain2(d){
+            return [
+                '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="academicallyQualified(&quot;'+ d.id + '&quot;,&quot;'+ d.state + '&quot;,&quot;'+ d.teachEndDate+'&quot;,'+'1'+')">成绩合格</button>',
+                '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="disqualification(&quot;'+ d.id + '&quot;,&quot;'+ d.state+ '&quot;,&quot;'+ d.teachEndDate+'&quot;,'+'2'+')">成绩不合格</button>'
+            ]
+                .join('');
+        };
+
+        //成绩合格
+        window.academicallyQualified = function(id,state,teachEndDate,type){
+            if(state=="1" ){
+                layer.msg("当前课程已评分！")
+                return;
+            }
+            var nowDate =Date.parse(new Date());
+            var endDate = Date.parse(teachEndDate);
+            var timeDifference = nowDate-endDate;
+            if(state=="0" && timeDifference < 0){
+                layer.msg("当前课程未结束，无法评分！")
+                return;
+            }
+            updateStudentScore(id,type,"");
+        };
+
+        window.disqualification = function(id,state,teachEndDate,type){
+            if(state=="1" ){
+                layer.msg("当前课程已评分！")
+                return;
+            }
+            var nowDate =Date.parse(new Date());
+            var endDate = Date.parse(teachEndDate);
+            var timeDifference = nowDate-endDate;
+            if(state=="0" && timeDifference < 0){
+                layer.msg("当前课程未结束，无法评分！")
+                return;
+            }
+            //打开窗口添加不合格说明
+
+        }
+
+        //修改学院状态 id  是否合格、评分备注
+        window.updateStudentScore = function (id,isQualified,creditsRemark) {
+            var data = {
+                'id': id,
+                'isQualified': isQualified,
+                'creditsRemark': creditsRemark,
+            };
+            data = JSON.stringify(data);
+            // $.ajax({
+            //     url: '/manage/updateTeacher',
+            //     method: 'post',
+            //     data: data,
+            //     contentType: "application/json;charset=utf-8",
+            //     traditional: true,
+            //     dataType: 'text',
+            //     success: function (res) {
+            //         res = JSON.parse(res)
+            //         if(res.code == '201'){
+            //             layer.msg(res.data)
+            //         }else{
+            //             var message = res.data;
+            //             tableIns.reload();
+            //             layer.msg(res.data)
+            //         }
+            //     }
+            // });
+        };
+
+
+
+    });
+</script>
+</body>
+</html>

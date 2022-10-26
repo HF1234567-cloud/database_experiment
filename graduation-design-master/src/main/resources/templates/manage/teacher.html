@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>教师管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="teacher_column">
+                <div class="teacher_top">
+                    教师管理 <hr>
+                </div>
+                <div class="search_top">
+                    <div class="dropdown search_college">
+                        <span class="name_title">选择学院:</span>
+                        <select class="dropbtn" id="tag" name="tag">
+                            <option value="0">选择所属的学院</option>
+                            <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.name}" />
+                        </select>
+                    </div>
+
+                    <div class="search_name">
+                        <span class="name_title">姓名:</span>
+                        <input type="text" name="username" id="username"  autocomplete="off" placeholder="请输入姓名/支持模糊查询" class="search_input">
+                    </div>
+                    <div class="search_btn">
+                        <button type="button" class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="teacher_content">
+                    <blockquote class="layui-elem-quote">
+
+                        <table class="layui-hide" id="teacher" lay-filter="teacher"></table>
+                    </blockquote>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script></script>
+<script>
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#teacher',
+            url:'/manage/teacherList',
+            cols: [
+                [
+                    {field:'username', title:'教师姓名'},
+                    {field:'phone', title:'手机号'},
+                    {field:'email', title:'邮箱'},
+                    {field:'collegeName', title: '教师所属学院'},
+                    {templet: complain, title: '是否禁用', align:'center'}
+                ]
+            ],
+            id: 'teacherReload',
+        });
+
+        //是否禁用按钮
+        function complain(d){
+            var returnData;
+            if(d.state == "1"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateTeacherState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateTeacherState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+        };
+
+        //修改学院状态
+        window.updateTeacherState = function (id,state) {
+            var data = {
+                'id': id,
+                'state': state
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateTeacher',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        var active = {
+            reload: function(){
+                var username = $('#username');
+                var collegeId = $('select[name="tag"] option:selected').val();
+                //执行重载
+                table.reload('teacherReload', {
+                    where: {
+                        'username': username.val(),
+                        'collegeId':collegeId
+                        // key: {
+                        //
+                        // }
+                    }
+                }, 'data');
+            }
+        };
+
+
+        $('.teacher_column .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+    });
+</script>
+</body>
+</html>

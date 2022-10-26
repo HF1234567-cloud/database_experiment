@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>菜单管理</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="menu_cloum">
+                <fieldset class="layui-elem-field">
+                    <legend>菜单管理</legend>
+                    <div class="layui-field-box">
+                        <div>
+                            <table id="menuTreeTb"></table>
+                        </div>
+                        <div class="site-demo-button" id="layerDemo" style="margin-bottom: 0;">
+                            <button data-method="notice" class="layui-btn layui-btn-primary">添加菜单</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script>
+</script>
+<script>
+    layui.config({
+        base: '../../static/layui/'
+    }).use(['layer','table','treeTable'], function(){
+        var $ = layui.jquery
+            ,layer = layui.layer
+            ,table = layui.table
+            ,treeTable = layui.treeTable;
+
+        // 渲染树形表格
+        var renderTable = treeTable.render({
+            elem: '#menuTreeTb',
+            url:"/manage/menuList",
+            tree: {
+                iconIndex: 0,           // 折叠图标显示在第几列
+                isPidData: true,        // 是否是id、pid形式数据
+                idName: 'id',           // id字段名称
+                pidName: 'parentId'    // pid字段名称
+            },
+            cols: [
+                    [
+                        {field: 'name', title: '菜单名称', edit: 'text'},
+                        {field: 'href', title: '资源路径', edit: 'text'},
+                        {field: 'remark', title: '菜单简介', edit: 'text'},
+                        {field: 'sort', title: '排序', edit:'number'},
+                        {templet: complain, title: '是否禁用', align:'center'},
+                        {templet: complain2, title: '操作', align:'center'}
+                    ]
+                ]
+        });
+
+        //是否禁用按钮
+        function complain(d){
+            var returnData;
+            if(d.state == "1"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateMenuState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateMenuState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+        };
+
+        //添加下级菜单按钮
+        function complain2(d){
+            var returnBtn;
+            if(d.parentId == '0'){
+                returnBtn = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="addLowerMenu(\''+ d.id + '\')">添加下级菜单</button>'
+            }else{
+                returnBtn = '<button type="button" style="text-align: center" class="layui-btn layui-btn-disabled layui-btn-sm" disabled>添加下级菜单</button>'
+            }
+            return [
+                returnBtn
+            ]
+                .join('');
+        };
+
+        //监听工具条
+        table.on('tool(menuTreeTb)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(data.title!=null){
+                if (layEvent === 'del') {
+                    layer.msg('删除' + data.id);
+                } else if (layEvent === 'edit') {
+                    layer.msg('修改' + data.id);
+                }
+            }
+        });
+
+        //修改修改菜单
+        treeTable.on('edit(menuTreeTb)', function(obj){
+            //修改后的值
+            var value = obj.value;
+            //当前编辑的字段名
+            var updateKey = obj.field;
+            //所在行所有相关数据
+            var menu = obj.data;
+            var data = {
+                'id': menu.id
+            };
+            data[updateKey]=value
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateMenu',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.msg)
+                    }else{
+                        var message = res.data;
+                        renderTable.refresh();;
+                        layer.msg(res.data)
+                    }
+                }
+            });
+
+        });
+
+        //修改菜单状态
+        window.updateMenuState = function(id,state){
+            var data = {
+                'id': id,
+                'state': state
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/updateMenu',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        renderTable.refresh();;
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        //添加一级菜单
+        $('#layerDemo .layui-btn').on('click', function(){
+            notice("0");
+        });
+
+        //添加下级菜单
+        window.addLowerMenu = function (id){
+            notice(id);
+        };
+
+        //添加通用方法菜单
+        window.addMenu = function(name, href, remark, sort, parentId){
+            var userId = [[${session.user.id}]];
+            var data = {
+                'name': name,
+                'href': href,
+                'remark': remark,
+                'href': href,
+                'sort': sort,
+                'parentId': parentId,
+                'createId':userId
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/manage/addMenu',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        layer.closeAll();
+                        renderTable.refresh();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+        //弹出框-添加菜单
+        window.notice = function(parentId){
+            layer.open({
+                type: 1
+                ,title: "添加一级菜单"
+                ,closeBtn: false
+                ,area: '500px;'
+                ,shade: 0.8
+                ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                ,btn: ['添加菜单', '取消添加']
+                ,btnAlign: 'c'
+                ,moveType: 1 //拖拽模式，0或者1
+                ,content: '<div class="layui-form-item">\n' +
+                    '  <label class="layui-form-label">菜单名称:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '    <input type="text" name="name" id="name" lay-verify="required" placeholder="菜单名称" autocomplete="off" class="layui-input account_input">\n' +
+                    '  </div>\n' +
+                    '</div>' +
+                    '<div class="layui-form-item">\n' +
+                    '  <label class="layui-form-label">资源路径:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '     <input type="text" name="href" id="href" lay-verify="required" placeholder="资源路径" autocomplete="off" class="layui-input account_input">\n' +
+                    '   </div>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '  <label class="layui-form-label">菜单简介:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '    <input type="text" name="remark" id="remark" lay-verify="required" placeholder="菜单简介" autocomplete="off" class="layui-input account_input">\n' +
+                    '  </div>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '  <label class="layui-form-label">菜单排序:</label>\n' +
+                    '  <div class="layui-input-block">\n' +
+                    '    <input type="number" name="sort" id="sort" lay-verify="required" placeholder="菜单排序" autocomplete="off" class="layui-input account_input">\n' +
+                    '  </div>\n' +
+                    '</div>'
+                ,yes: function(){
+                    var name = document.getElementById("name").value;
+                    var href = document.getElementById("href").value;
+                    var remark = document.getElementById("remark").value;
+                    var sort = document.getElementById("sort").value;
+                    addMenu(name, href, remark, sort, parentId);
+                },
+                btn2: function(){
+                    layer.closeAll();
+                }
+            });
+        };
+    });
+</script>
+</body>
+
+</html>

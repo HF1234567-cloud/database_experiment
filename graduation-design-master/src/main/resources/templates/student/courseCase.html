@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>选课中心</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="college_cloum">
+                选课中心
+                <hr>
+                <div>
+                    <blockquote class="layui-elem-quote">
+                        <table class="layui-hide" id="course" lay-filter="course"></table>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../static/layui/layui.all.js"/>
+</body>
+<script></script>
+<script th:inline="javascript">
+    layui.use(['table', 'layer'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery;
+
+        var tableIns = table.render({
+            elem: '#course',
+            url:'/student/courseList',
+            cols: [
+                [
+                    {field:'courseName', title:'课程名称'},
+                    {field:'collegeName', title:'学院名称'},
+                    {field:'credits', title:'学分'},
+                    {field:'startDate', title: '选修开始时间'},
+                    {field:'endDate', title: '选修结束时间'},
+                    {field:'optional', title: '可选人数'},
+                    {field:'selected', title: '已选人数'},
+                    {templet: complain, title: '课程详情', align:'center'},
+                    {templet: complain2, title: '操作', align:'center'},
+                ]
+            ]
+        });
+
+        function complain(d){
+            return [
+                '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="openClassDetail(&quot;'+ d.remark + '&quot;)">课程详情</button>'
+            ]
+                .join('');
+        };
+
+        //选课按钮
+        function complain2(d){
+            var returnData;
+            if(d.type == "0"){
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="courseSelection(&quot;'+ d.id + '&quot;,'+ d.type+')">选课</button>'
+            }else{
+                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="courseSelection(&quot;'+ d.id + '&quot;,'+ d.type+')">已选</button>'
+            }
+            return [
+                returnData
+            ]
+                .join('');
+        };
+
+        //选课
+        window.courseSelection = function (id,type) {
+            var studentId = [[${session.user.id}]];
+            var data = {
+                'courseId': id,
+                'type': type,
+                'studentId': studentId,
+            };
+            console.log(data)
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/student/courseSelection',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        tableIns.reload();
+                        layer.msg(res.data)
+                    }
+                }
+            });
+        };
+
+        //课程详情
+        window.openClassDetail = function (remark) {
+            var text = remark;
+            console.log("测试",text)
+            layer.msg(text, {
+                time: 10000, //20s后自动关闭
+                closeBtn: true
+            });
+        };
+
+    });
+</script>
+</html>

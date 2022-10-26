@@ -1,0 +1,91 @@
+body{
+    background-image:url("../img/background.png");
+}
+.content{
+    margin-top: 50px;
+}
+.middle_column{
+    margin:auto auto;
+    width: 522px;
+    height: 600px;
+    border: 1px solid red;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.zh_title{
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 8px 0;
+}
+.en_title{
+    font-size: 18px;
+    text-align: center;
+    color: rgb(183, 147, 126);
+    margin-bottom: 20px;
+}
+.layui-input-block .layui-input{
+    width: 80%;
+}
+
+
+/* 下拉按钮样式 */
+.dropbtn {
+    font-size: 14px;
+    height: 40px;
+    width: 200px;
+    line-height: 40px;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #fff;
+    border-radius: 2px;
+    padding-left: 4px;
+    cursor: pointer;
+    border-color: #e6e6e6;
+    color: #777;
+}
+.search_top{
+    margin-top: 20px;
+}
+/* 容器 <div> - 需要定位下拉内容 */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    padding-left: 46px;
+}
+
+/* 鼠标移上去后修改下拉菜单链接颜色 */
+.dropdown option:hover {
+    background-color: #5FB878;
+    color: #fff;
+}
+
+
+.sub_column{
+    margin-top: 20px;
+    width: 100%;
+}
+.layui-btn-lg{
+    margin:0 203px;
+}
+
+.bottom_tip{
+    text-align: center;
+}
+
+.tip_content{
+    margin: 27px 0;
+}
+
+.layui-unselect{
+    float: left;
+    padding-left: 5px;
+}
+
+.name_title{
+    float: left;
+    display: block;
+    line-height: 37px;
+}

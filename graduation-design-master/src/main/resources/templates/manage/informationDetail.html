@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>查询/修改资讯信息</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+
+            <div class="information_column">
+                <div class="information_top">
+                    首页咨询消息详情
+                    <hr>
+                </div>
+                <div class="layui-form-item" pane="">
+                    <label class="layui-form-label role_title">资讯消息显示:</label>
+                    <div class="layui-input-block" >
+                        <input type="radio" class="role_input left_input" name="roleType" value="3" th:field="*{information.roleId}" th:disabled="${information != null ?true:false}" ><span class="label">学生端</span>
+                        <input type="radio" class="role_input" name="roleType" value="2" th:field="*{information.roleId}" th:disabled="${information != null ?true:false}"><span class="label" >教师端</span>
+                        <input type="radio" class="role_input" name="roleType" value="1" th:field="*{information.roleId}" th:disabled="${information != null ?true:false}"}} disabled='disabled'> <span class="label">管理端</span>
+                    </div>
+                </div>
+                <div class="information_title">
+                    <label class="layui-form-label">标题:</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="title" id="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input" th:value="${information.title}">
+                    </div>
+                </div>
+                <div class="information_content">
+                    <label class="layui-form-label">内容:</label>
+                    <div class="layui-input-block">
+                        <textarea placeholder="请输入内容" id="content" class="layui-textarea" >[[${information.content}]]</textarea>
+                    </div>
+                </div>
+                <div class="information_date">
+                    <label class="layui-form-label" >发布日期:</label>
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="test11" placeholder="yyyy年MM月dd日" th:value="${information.publishDate}"  th:disabled="${information != null ?true:false}">
+                    </div>
+                </div>
+                <div class="information_sub">
+                    <button type="button" class="layui-btn layui-btn-primary" th:if="${not #strings.isEmpty(information)}" onclick="updateInformation()">修改资讯信息</button>
+                    <button type="button" class="layui-btn layui-btn-primary" th:if="${#strings.isEmpty(information)}" onclick="addInformation()">发布资讯信息</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script></script>
+</body>
+<script>
+    layui.use(['form', 'layer'], function(){
+        var form = layui.form ,
+            layer = layui.layer ;
+
+        //修改资讯信息
+         window.updateInformation = function() {
+            var id = [[${information.id}]]
+            var title = document.getElementById("title").value;
+            var content = document.getElementById("content").value;
+             var data = {
+                 'id': id,
+                 'title': title,
+                 'content': content
+             };
+             data = JSON.stringify(data);
+             layui.jquery.ajax({
+                 url: '/manage/updateInformation',
+                 method: 'post',
+                 data: data,
+                 contentType: "application/json;charset=utf-8",
+                 traditional: true,
+                 dataType: 'text',
+                 success: function (res) {
+                     res = JSON.parse(res)
+                     if(res.code == '201'){
+                         layer.msg(res.msg)
+                     }else{
+                         window.location.href="/manage/information";
+                         layer.msg(res.data)
+                     }
+                 }
+             });
+        };
+
+         //添加资讯信息
+         window.addInformation = function () {
+             var user = [[${session.user}]];
+             console.log("user:",user)
+
+
+
+             // var title = document.getElementById("title").value;
+             // var content = document.getElementById("content").value;
+             // var data = {
+             //     'title': title,
+             //     'content': content
+             // };
+             // data = JSON.stringify(data);
+             // layui.jquery.ajax({
+             //     url: '/manage/addInformation',
+             //     method: 'post',
+             //     data: data,
+             //     contentType: "application/json;charset=utf-8",
+             //     traditional: true,
+             //     dataType: 'text',
+             //     success: function (res) {
+             //         res = JSON.parse(res)
+             //         if(res.code == '201'){
+             //             layer.msg(res.msg)
+             //         }else{
+             //             window.location.href="/manage/information";
+             //             layer.msg(res.data)
+             //         }
+             //     }
+             // });
+         }
+    });
+</script>
+</html>

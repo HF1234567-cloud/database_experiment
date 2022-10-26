@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>添加课程</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+
+            <div class="teacher_column">
+                <div class="teacher_top">
+                    课程添加 <hr>
+                </div>
+                <div>
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">课程名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="courseName" id="courseName" autocomplete="off" placeholder="请输入课程名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">上课地点</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="classPlace" id="classPlace" autocomplete="off" placeholder="请输入上课地点" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">上课时间</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="classDate" id="classDate" autocomplete="off" placeholder="请输入上课时间" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">设置学分</label>
+                        <div class="layui-input-block">
+                            <input type="number" name="credits" id="credits" autocomplete="off" placeholder="请设置课程学分" class="layui-input">
+                        </div>
+                    </div>
+                    <!--<div class="layui-form-item input_box">-->
+                        <!--<label class="layui-form-label">设置学年</label>-->
+                        <!--<div class="layui-input-block">-->
+                            <!--<input type="text" name="academicYear" id="academicYear" autocomplete="off" placeholder="请设置课程学年" class="layui-input">-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">可选人数</label>
+                        <div class="layui-input-block">
+                            <input type="number" name="optional" id="optional" autocomplete="off" placeholder="请设置课程可选人数" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item input_box">
+                        <label class="layui-form-label">预选人数</label>
+                        <div class="layui-input-block">
+                            <input type="number" name="primary" id="primary" autocomplete="off" placeholder="请设置课程预选人数" class="layui-input">
+                        </div>
+                    </div>
+                    <fieldset class="layui-elem-field special-box">
+                        <legend>报考时间段选择</legend>
+                        <div class="layui-field-box">
+                            <div class="layui-inline input_box">
+                                <label class="layui-form-label">开始时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="startDate" placeholder="yyyy-MM-dd HH:mm:ss">
+                                </div>
+                            </div>
+                            <div class="layui-inline input_box">
+                                <label class="layui-form-label">结束时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="endDate" placeholder="yyyy-MM-dd HH:mm:ss">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field special-box">
+                        <legend>学院与教师选择</legend>
+                        <div class="layui-field-box">
+                            <div class="dropdown input_box check_box">
+                                <span class="name_title">选择学院:</span>
+                                <select class="dropbtn" id="collegeId" name="collegeId">
+                                    <option value="0">请选择学院</option>
+                                    <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.name}" />
+                                </select>
+                            </div>
+                            <div class="dropdown input_box check_box">
+                                <span class="name_title">选课教师:</span>
+                                <select class="dropbtn" id="teacherId" name="teacherId">
+                                    <option value="0">请选择教师</option>
+                                    <option th:each="teacher : ${teacherList}" th:value="${teacher.id}" th:text="${teacher.username}" />
+                                </select>
+                            </div>
+
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field special-box">
+                        <legend>课程结束时间选择</legend>
+                        <div class="layui-field-box">
+                            <div class="layui-inline input_box">
+                                <label class="layui-form-label">选择时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="teachEndDate" placeholder="yyyy-MM-dd HH:mm:ss">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">课程说明</label>
+                        <div class="layui-input-block">
+                            <textarea placeholder="请输入课程说明" id="text-area" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-course-btn">
+                    <button type="button" class="layui-btn" onclick="addCourse()">添加课程</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"/>
+<script></script>
+<script>
+    layui.use(['table', 'layer', 'laydate'], function(){
+        var layer = layui.layer,
+            table = layui.table,
+            $ = layui.jquery,
+            laydate = layui.laydate;;
+
+        //日期时间选择器
+        laydate.render({
+            elem: '#startDate'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endDate'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#teachEndDate'
+            ,type: 'datetime'
+        });
+
+        window.addCourse = function () {
+            //课程
+            var courseName = $('#courseName').val();
+            //学院
+            var collegeId = $('select[name="collegeId"] option:selected').val();
+            //教师
+            var teacherId = $('select[name="teacherId"] option:selected').val();
+            //上课地点
+            var classPlace = $('#classPlace').val();
+            //上课时间
+            var classDate = $('#classDate').val();
+            //课程学分
+            var credits = $('#credits').val();
+            // //课程学年
+            // var academicYear = $('#academicYear').val();
+            //可选人数
+            var optional = $('#optional').val();
+            //预选人数
+            var primary = $('#primary').val();
+            //报考开始时间
+            var startDate = $('#startDate').val();
+            //报考结束时间
+            var endDate = $('#endDate').val();
+            //课程结束时间
+            var teachEndDate = $('#teachEndDate').val();
+            //课程说明
+            var textArea = $('#text-area').val();
+            var data = {
+                'courseName': courseName,
+                'collegeId': collegeId,
+                'teacherId': teacherId,
+                'classPlace': classPlace,
+                'classDate': classDate,
+                'credits': credits,
+                // 'academicYear': academicYear,
+                'optional': optional,
+                'primaryAmount': primary,
+                'startDate': startDate,
+                'endDate': endDate,
+                'teachEndDate': teachEndDate,
+                'remark': textArea,
+            };
+            data = JSON.stringify(data);
+            $.ajax({
+                url: '/course/addCourse',
+                method: 'POST',
+                data: data,
+                contentType: "application/json",
+                traditional: true,
+                dataType: 'text',
+                success: function (res) {
+                    res = JSON.parse(res)
+                    if(res.code == '201'){
+                        layer.msg(res.data)
+                    }else{
+                        var message = res.data;
+                        window.location.href="/course/list";
+                        layer.msg(res.data)
+                    }
+                }
+            });
+
+        };
+    });
+</script>
+</body>
+</html>
