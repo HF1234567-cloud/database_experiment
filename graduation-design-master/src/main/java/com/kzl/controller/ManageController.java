@@ -51,7 +51,7 @@ public class ManageController {
             modelAndView.setViewName("redirect:/");
             return modelAndView;
         }
-        modelAndView.setViewName("/manage/menu");
+        modelAndView.setViewName("manage/menu");
         return modelAndView;
     }
 
@@ -88,7 +88,7 @@ public class ManageController {
     @RequestMapping("college")
     public String college(HttpServletRequest request){
         boolean state = judgeUserLoginState(request);
-        return state?"/manage/college":"redirect:/";
+        return state?"manage/college":"redirect:/";
     }
 
     //查询学院列表数据
