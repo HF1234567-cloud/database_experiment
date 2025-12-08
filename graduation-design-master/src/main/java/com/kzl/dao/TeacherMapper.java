@@ -15,4 +15,6 @@ public interface TeacherMapper {
     boolean updateStudentCourseRel(StudentCourseRel studentCourseRel);
 
     List<CourseAcademicYear> selectCourseAcademicYearList();
+
+    List<TeacherStatis> selectTeacherStatisList(String teacherId);
 }

@@ -31,4 +31,13 @@
         SELECT id,academicYear,state
         FROM course_academic_year
     </select>
+    
+   <select id="selectTeacherStatisList" resultType="com.kzl.entity.TeacherStatis">
+        SELECT count(s.studentNumber),cu.name name
+        FROM student_course_rel sc
+            LEFT JOIN course c ON c.id=sc.courseId
+            LEFT JOIN student s ON s.id = sc.studentId
+            LEFT JOIN college cu ON cu.id = c.collegeId
+        WHERE c.teacherId=#{teacherId} GROUP BY name;
+   </select>
 </mapper>

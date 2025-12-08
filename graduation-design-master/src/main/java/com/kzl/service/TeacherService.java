@@ -26,4 +26,6 @@ public interface TeacherService {
 
     //学年列表
     List<CourseAcademicYear> selectCourseYearList(String courseAcademicYearId);
+
+    List<TeacherStatis> selectTeacherStatisList(String teacherId);
 }

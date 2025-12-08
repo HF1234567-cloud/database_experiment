@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+
 
 @Controller
 @RequestMapping("teacher")
@@ -126,12 +128,26 @@ public class TeacherController {
 
 
     //统计信息
+    // @RequestMapping("statisticalInfo")
+    // public String statisticalInfo(HttpServletRequest request){
+    //     boolean state = judgeUserLoginState(request);
+    //     return state?"teacher/statisticalInfo":"redirect:/";
+    // }
     @RequestMapping("statisticalInfo")
-    public String statisticalInfo(HttpServletRequest request){
+    public ModelAndView statisticalInfo(HttpServletRequest request){
         boolean state = judgeUserLoginState(request);
-        return state?"teacher/statisticalInfo":"redirect:/";
+        ModelAndView modelAndView = new ModelAndView();
+        if (state ==  true)
+        {
+            Teacher user = (Teacher) request.getSession().getAttribute("user");
+            List<TeacherStatis> CoutStudent_collage = teacherService.selectTeacherStatisList(user.getId());
+            modelAndView.setViewName("teacher/statisticalInfo");
+            modelAndView.addObject("TeacherStatis", CoutStudent_collage);
+        }else {
+            modelAndView.setViewName("redirect:/");
+        }
+        return  modelAndView;
     }
-
 
 
 

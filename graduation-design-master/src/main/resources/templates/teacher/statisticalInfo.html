@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>选课统计</title>
+    <!-- 引入样式文件 -->
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link href="../../static/css/course.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- 头部导航栏（复用公共组件） -->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    
+    <!-- 左边菜单栏（复用公共组件） -->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="index_cloum course-box">
+                <!-- 标题 -->
+                <blockquote class="layui-elem-quote">选课统计</blockquote>
+                
+                <!-- 统计数据展示（循环渲染后端传递的TeacherStatis列表） -->
+                <blockquote class="layui-elem-quote course-column count-box" th:each="ths:${TeacherStatis}">
+                    <div>已完成课程统计</div>
+                    <hr>
+                    <div class="count-tip">当前已选课程人数: <span class="count_num" th:text="${ths.count}"></span></div>
+                    <div class="count-tip">当前已选学员专业: <span class="collage_num" th:text="${ths.name}"></span></div>
+                    <div class="clear"></div>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

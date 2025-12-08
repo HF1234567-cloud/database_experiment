@@ -83,4 +83,10 @@ public class TeacherServiceImpl implements TeacherService {
         }
         return courseAcademicYears;
     }
+    @Override
+    public List<TeacherStatis> selectTeacherStatisList(String teacherId){
+        List<TeacherStatis>teacherStatiss=teacherMapper.selectTeacherStatisList(teacherId);
+        return teacherStatiss;
+    }
+
 }
