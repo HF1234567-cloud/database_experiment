@@ -68,18 +68,34 @@ public class TeacherController {
 
     //成绩管理
     @RequestMapping("scoreInfo")
-    public String scoreInfo(HttpServletRequest request){
+    public ModelAndView scoreInfo(HttpServletRequest request){
         boolean state = judgeUserLoginState(request);
-        return state?"teacher/scoreInfo":"redirect:/";
+        ModelAndView modelAndView = new ModelAndView();
+        if(!state){
+            modelAndView.setViewName("redirect:/");
+            return modelAndView;
+        }
+        Teacher user = (Teacher) request.getSession().getAttribute("user");
+        CourseAcademicYear currentYear = studentService.getCourseAcademicYear();
+        List<CourseAcademicYear> academicYears = teacherService.selectCourseYearList(currentYear.getId());
+        List<Course> courses = teacherService.selectCourseListByTeacherId(user.getId());
+
+        modelAndView.setViewName("teacher/scoreInfo");
+        modelAndView.addObject("academicYears", academicYears);
+        modelAndView.addObject("courses", courses);
+        return modelAndView;
     }
 
     //教师关联课程下所有的学生信息查询
     @ResponseBody
     @RequestMapping("courseList")
-    public Result courseList(HttpServletRequest request){
+    public Result courseList(HttpServletRequest request, String academicYear, String courseId, String studentName){
         Teacher user = (Teacher) request.getSession().getAttribute("user");
-        CourseAcademicYear courseAcademicYear = studentService.getCourseAcademicYear();
-        List<StudentCourseRel> courses = teacherService.queryStudentList(courseAcademicYear.getAcademicYear(),user.getId());
+        if (academicYear == null || academicYear.isEmpty() || "请选择学年".equals(academicYear)) {
+             CourseAcademicYear courseAcademicYear = studentService.getCourseAcademicYear();
+             academicYear = courseAcademicYear.getAcademicYear();
+        }
+        List<StudentCourseRel> courses = teacherService.queryStudentList(academicYear,user.getId(), courseId, studentName);
         return Result.create(0,"",courses);
     }
 
@@ -117,11 +133,13 @@ public class TeacherController {
     //选修课程的学生信息查询
     @ResponseBody
     @RequestMapping("studentInfoInCourse")
-    public Result studentInfoInCourse(HttpServletRequest request){
+    public Result studentInfoInCourse(HttpServletRequest request, String academicYear, String courseId, String studentName){
         Teacher user = (Teacher) request.getSession().getAttribute("user");
-        CourseAcademicYear courseAcademicYear = studentService.getCourseAcademicYear();
-        String academicYear = courseAcademicYear.getAcademicYear();
-        List<StudentCourseRel> studentCourses = teacherService.getStudentInCourse(academicYear,user.getId());
+        if (academicYear == null || academicYear.isEmpty() || "请选择学年".equals(academicYear)) {
+             CourseAcademicYear courseAcademicYear = studentService.getCourseAcademicYear();
+             academicYear = courseAcademicYear.getAcademicYear();
+        }
+        List<StudentCourseRel> studentCourses = teacherService.getStudentInCourse(academicYear,user.getId(), courseId, studentName);
         return Result.create(0,"",studentCourses);
     }
 
@@ -141,8 +159,10 @@ public class TeacherController {
         {
             Teacher user = (Teacher) request.getSession().getAttribute("user");
             List<TeacherStatis> CoutStudent_collage = teacherService.selectTeacherStatisList(user.getId());
+            List<TeacherStatis> courseCountList = teacherService.selectCourseCountList(user.getId());
             modelAndView.setViewName("teacher/statisticalInfo");
             modelAndView.addObject("TeacherStatis", CoutStudent_collage);
+            modelAndView.addObject("CourseStatis", courseCountList);
         }else {
             modelAndView.setViewName("redirect:/");
         }

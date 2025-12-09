@@ -26,27 +26,21 @@
                 <div class="search_top">
                     <div class="dropdown search_college2">
                         <span class="name_title">选择学年:</span>
-                        <select class="dropbtn" id="tag" name="tag">
-                            <option >请选择学年</option>
-                            <option value="1">2020年下半学年</option>
-                            <option value="2">2020年上半学年</option>
-                            <option value="3">2019年下半学年</option>
-                            <option value="3">2019年上半学年</option>
+                        <select class="dropbtn" id="academicYear" name="academicYear">
+                            <option value="">请选择学年</option>
+                            <option th:each="year : ${academicYears}" th:value="${year.academicYear}" th:text="${year.academicYearName}"></option>
                         </select>
                     </div>
                     <div class="dropdown search_college2">
                         <span class="name_title">选择课程:</span>
-                        <select class="dropbtn" id="tag2" name="tag">
-                            <option >请选择课程</option>
-                            <option value="1">音乐鉴赏</option>
-                            <option value="2">音乐鉴赏2</option>
-                            <option value="3">音乐鉴赏3</option>
-                            <option value="3">音乐鉴赏4</option>
+                        <select class="dropbtn" id="courseId" name="courseId">
+                            <option value="">请选择课程</option>
+                            <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.courseName}"></option>
                         </select>
                     </div>
                     <div class="search_name2">
                         <span class="name_title">学生姓名:</span>
-                        <input type="text" name="username" id="username"  autocomplete="off" placeholder="请输入学生姓名" class="search_input">
+                        <input type="text" name="studentName" id="studentName"  autocomplete="off" placeholder="请输入学生姓名" class="search_input">
                     </div>
                     <div class="search_btn2">
                         <button type="button" class="layui-btn" data-type="reload">搜索</button>
@@ -70,6 +64,31 @@
         var layer = layui.layer,
             table = layui.table,
             $ = layui.jquery;
+
+        var active = {
+            reload: function(){
+                var academicYear = $('#academicYear').val();
+                var courseId = $('#courseId').val();
+                var studentName = $('#studentName').val();
+
+                //执行重载
+                table.reload('teacherReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        academicYear: academicYear,
+                        courseId: courseId,
+                        studentName: studentName
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.search_btn2 .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
 
         var tableIns = table.render({
             elem: '#teacher',
@@ -126,7 +145,8 @@
                 layer.msg("当前课程未结束，无法评分！")
                 return;
             }
-            updateStudentScore(id,type,"");
+            // type=1 表示合格，isQualified应该传'1'
+            updateStudentScore(id,"1","");
         };
 
         window.disqualification = function(id,state,teachEndDate,type){
@@ -141,8 +161,8 @@
                 layer.msg("当前课程未结束，无法评分！")
                 return;
             }
-            //打开窗口添加不合格说明
-
+            // type=2 表示不合格，isQualified应该传'0'
+            updateStudentScore(id, "0", "");
         }
 
         //修改学院状态 id  是否合格、评分备注
@@ -153,24 +173,23 @@
                 'creditsRemark': creditsRemark,
             };
             data = JSON.stringify(data);
-            // $.ajax({
-            //     url: '/manage/updateTeacher',
-            //     method: 'post',
-            //     data: data,
-            //     contentType: "application/json;charset=utf-8",
-            //     traditional: true,
-            //     dataType: 'text',
-            //     success: function (res) {
-            //         res = JSON.parse(res)
-            //         if(res.code == '201'){
-            //             layer.msg(res.data)
-            //         }else{
-            //             var message = res.data;
-            //             tableIns.reload();
-            //             layer.msg(res.data)
-            //         }
-            //     }
-            // });
+            $.ajax({
+                url: '/teacher/updateScore',
+                method: 'post',
+                data: data,
+                contentType: "application/json;charset=utf-8",
+                traditional: true,
+                dataType: 'json',
+                success: function (res) {
+                    if(res.code == '0'){
+                        layer.msg(res.msg);
+                        // 使用 layui.table.reload 重新加载表格
+                        layui.table.reload('teacherReload');
+                    }else{
+                        layer.msg(res.msg);
+                    }
+                }
+            });
         };
 
 

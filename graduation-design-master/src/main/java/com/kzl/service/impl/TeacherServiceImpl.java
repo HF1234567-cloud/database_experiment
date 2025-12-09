@@ -45,8 +45,8 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    public List<StudentCourseRel> queryStudentList(String academicYear, String userId) {
-        List<StudentCourseRel> studentCourseRels = teacherMapper.selectStudentListByCourse(academicYear,userId);
+    public List<StudentCourseRel> queryStudentList(String academicYear, String userId, String courseId, String studentName) {
+        List<StudentCourseRel> studentCourseRels = teacherMapper.selectStudentListByCourse(academicYear,userId, courseId, studentName);
         return studentCourseRels;
     }
 
@@ -61,9 +61,9 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    public List<StudentCourseRel> getStudentInCourse(String academicYear, String userId) {
-        List<StudentCourseRel> studentCourses =  teacherMapper.selectStudentListByCourse(academicYear,userId);
-        return studentCourses;
+    public List<StudentCourseRel> getStudentInCourse(String academicYear, String userId, String courseId, String studentName) {
+        List<StudentCourseRel> studentCourseRels = teacherMapper.selectStudentListByCourse(academicYear,userId, courseId, studentName);
+        return studentCourseRels;
     }
 
     @Override
@@ -87,6 +87,11 @@ public class TeacherServiceImpl implements TeacherService {
     public List<TeacherStatis> selectTeacherStatisList(String teacherId){
         List<TeacherStatis>teacherStatiss=teacherMapper.selectTeacherStatisList(teacherId);
         return teacherStatiss;
+    }
+
+    @Override
+    public List<TeacherStatis> selectCourseCountList(String teacherId) {
+        return teacherMapper.selectCourseCountList(teacherId);
     }
 
 }

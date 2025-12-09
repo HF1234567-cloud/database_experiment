@@ -34,9 +34,124 @@
                     <div class="count-tip">当前已选学员专业: <span class="collage_num" th:text="${ths.name}"></span></div>
                     <div class="clear"></div>
                 </blockquote>
+                
+                <!-- ECharts 图表容器 -->
+                <div class="layui-row layui-col-space15" style="margin-top: 20px;">
+                    <div class="layui-col-md6">
+                        <div id="main" style="width: 100%;height:400px;"></div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div id="courseChart" style="width: 100%;height:400px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script th:inline="javascript">
+    // 图表1：选课学生学院分布统计（饼状图）
+    var myChart = echarts.init(document.getElementById('main'));
+    var statisData = [[${TeacherStatis}]];
+    var pieData = [];
+    
+    if(statisData && statisData.length > 0){
+        for(var i=0; i<statisData.length; i++){
+            pieData.push({value: statisData[i].count, name: statisData[i].name});
+        }
+    }
+
+    var option = {
+        title: {
+            text: '选课学生学院分布统计',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left'
+        },
+        series: [
+            {
+                name: '人数',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: 40,
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: pieData
+            }
+        ]
+    };
+    myChart.setOption(option);
+
+    // 图表2：各课程选课人数统计（条形图）
+    var courseChart = echarts.init(document.getElementById('courseChart'));
+    var courseData = [[${CourseStatis}]];
+    var xData2 = [];
+    var yData2 = [];
+    
+    if(courseData && courseData.length > 0){
+        for(var i=0; i<courseData.length; i++){
+            xData2.push(courseData[i].name);
+            yData2.push(courseData[i].count);
+        }
+    }
+
+    var option2 = {
+        title: {
+            text: '各课程选课人数统计',
+            left: 'center'
+        },
+        tooltip: {},
+        xAxis: {
+            data: xData2,
+            axisLabel: {
+                interval: 0,
+                rotate: 30
+            }
+        },
+        yAxis: {},
+        series: [{
+            name: '人数',
+            type: 'bar',
+            data: yData2,
+            itemStyle: {
+                color: function(params) {
+                    // 定义一组颜色
+                    var colorList = [
+                        '#c23531', '#2f4554', '#61a0a8', '#d48265', '#91c7ae', '#749f83',
+                        '#ca8622', '#bda29a', '#6e7074', '#546570', '#c4ccd3',
+                        '#37A2DA', '#32C5E9', '#67E0E3', '#9FE6B8', '#FFDB5C', '#ff9f7f',
+                        '#fb7293', '#E062AE', '#E690D1', '#e7bcf3', '#9d96f5', '#8378EA', '#96BFFF'
+                    ];
+                    // 返回对应的颜色
+                    return colorList[params.dataIndex % colorList.length];
+                }
+            }
+        }]
+    };
+    courseChart.setOption(option2);
+</script>
 </body>
 </html>

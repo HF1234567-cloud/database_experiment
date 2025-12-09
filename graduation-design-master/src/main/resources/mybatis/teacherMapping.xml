@@ -13,12 +13,20 @@
     </select>
 
     <select id="selectStudentListByCourse" resultType="com.kzl.entity.StudentCourseRel">
-        SELECT s.username studentName,c.courseName courseName,c.credits courseCredits,c.academicYear academicYear,sc.isQualified isQualified,sc.state state,c.teachEndDate teachEndDate,s.studentNumber studentNumber
+        SELECT sc.id id,s.username studentName,c.courseName courseName,c.credits courseCredits,c.academicYear academicYear,sc.isQualified isQualified,sc.state state,c.teachEndDate teachEndDate,s.studentNumber studentNumber
         FROM student_course_rel sc
         LEFT JOIN course c ON c.id=sc.courseId
         LEFT JOIN student s ON s.id = sc.studentId
         WHERE c.teacherId=#{teacherId}
-        AND c.academicYear = #{academicYear}
+        <if test="academicYear != null and academicYear != ''">
+            AND c.academicYear = #{academicYear}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            AND c.id = #{courseId}
+        </if>
+        <if test="studentName != null and studentName != ''">
+            AND s.username LIKE concat('%',#{studentName},'%')
+        </if>
     </select>
 
     <update id="updateStudentCourseRel" parameterType="com.kzl.entity.StudentCourseRel">
@@ -33,11 +41,19 @@
     </select>
     
    <select id="selectTeacherStatisList" resultType="com.kzl.entity.TeacherStatis">
-        SELECT count(s.studentNumber),cu.name name
+        SELECT count(s.studentNumber) count,cu.name name
         FROM student_course_rel sc
             LEFT JOIN course c ON c.id=sc.courseId
             LEFT JOIN student s ON s.id = sc.studentId
             LEFT JOIN college cu ON cu.id = c.collegeId
-        WHERE c.teacherId=#{teacherId} GROUP BY name;
+        WHERE c.teacherId=#{teacherId} GROUP BY name
    </select>
+
+    <select id="selectCourseCountList" resultType="com.kzl.entity.TeacherStatis">
+        SELECT count(sc.studentId) count, c.courseName name
+        FROM course c
+        LEFT JOIN student_course_rel sc ON c.id = sc.courseId
+        WHERE c.teacherId = #{teacherId}
+        GROUP BY c.courseName
+    </select>
 </mapper>
