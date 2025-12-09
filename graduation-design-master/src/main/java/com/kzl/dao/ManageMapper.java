@@ -54,4 +54,12 @@ public interface ManageMapper {
     int deleteRoleMenuRelByRoleId(String roleId);
 
     boolean insertRole(Role role);
+
+    ManageUser selectManageUserById(String id);
+
+    int updateManageUserProfile(ManageUser manageUser);
+
+    ManageUser selectManageUserByIdAndPassword(String id, String password);
+
+    int updateManageUserPassword(String id, String newPassword);
 }

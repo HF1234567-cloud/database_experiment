@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>基本资料</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="layui-card">
+                <div class="layui-card-header">基本资料</div>
+                <div class="layui-card-body">
+                    <form class="layui-form" lay-filter="profileForm" style="max-width: 600px;">
+                        <input type="hidden" name="id" th:value="${userInfo.id}">
+                        
+                        <!-- 学生特有字段 -->
+                        <div class="layui-form-item" th:if="${userType == '3'}">
+                            <label class="layui-form-label">学号</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="studentNumber" th:value="${userInfo.studentNumber}" 
+                                       readonly class="layui-input layui-disabled">
+                            </div>
+                        </div>
+                        
+                        <!-- 教师和管理员特有字段 -->
+                        <div class="layui-form-item" th:if="${userType == '2' || userType == '1'}">
+                            <label class="layui-form-label">登录名</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="loginName" th:value="${userInfo.loginName}" 
+                                       readonly class="layui-input layui-disabled">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">姓名</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="username" th:value="${userInfo.username}" 
+                                       placeholder="请输入姓名" class="layui-input" lay-verify="required">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">手机号</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="phone" th:value="${userInfo.phone}" 
+                                       placeholder="请输入手机号" class="layui-input" lay-verify="required|phone">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">邮箱</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="email" th:value="${userInfo.email}" 
+                                       placeholder="请输入邮箱" class="layui-input" lay-verify="required|email">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">角色</label>
+                            <div class="layui-input-block">
+                                <input type="text" th:value="${userInfo.roleName}" 
+                                       readonly class="layui-input layui-disabled">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item" th:if="${userInfo.collegeName != null}">
+                            <label class="layui-form-label">学院</label>
+                            <div class="layui-input-block">
+                                <input type="text" th:value="${userInfo.collegeName}" 
+                                       readonly class="layui-input layui-disabled">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="submitProfile">保存修改</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"></script>
+<script th:inline="javascript">
+    layui.use(['form', 'layer'], function(){
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery;
+
+        var userType = [[${userType}]];
+
+        //监听提交
+        form.on('submit(submitProfile)', function(data){
+            $.ajax({
+                url: '/common/updateProfile',
+                method: 'post',
+                data: JSON.stringify({
+                    userType: userType,
+                    userInfo: data.field
+                }),
+                contentType: "application/json;charset=utf-8",
+                dataType: 'json',
+                success: function (res) {
+                    if(res.code == 0){
+                        layer.msg(res.message || '资料修改成功', {icon: 1, time: 2000});
+                        // 更新session中的用户名
+                        setTimeout(function(){
+                            location.reload();
+                        }, 2000);
+                    }else{
+                        layer.msg(res.message || '资料修改失败', {icon: 2, time: 2000});
+                    }
+                },
+                error: function(xhr, status, error) {
+                    layer.msg('请求失败：' + error, {icon: 2, time: 2000});
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

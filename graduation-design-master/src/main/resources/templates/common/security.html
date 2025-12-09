@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>安全设置</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="layui-card">
+                <div class="layui-card-header">修改密码</div>
+                <div class="layui-card-body">
+                    <form class="layui-form" lay-filter="passwordForm" style="max-width: 600px;">
+                        <input type="hidden" name="id" th:value="${userId}">
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">原密码</label>
+                            <div class="layui-input-block">
+                                <input type="password" name="oldPassword" 
+                                       placeholder="请输入原密码" class="layui-input" 
+                                       lay-verify="required" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">新密码</label>
+                            <div class="layui-input-block">
+                                <input type="password" name="newPassword" 
+                                       placeholder="请输入新密码" class="layui-input" 
+                                       lay-verify="required|newPwd" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">确认密码</label>
+                            <div class="layui-input-block">
+                                <input type="password" name="confirmPassword" 
+                                       placeholder="请再次输入新密码" class="layui-input" 
+                                       lay-verify="required|confirmPwd" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="submitPassword">修改密码</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"></script>
+<script th:inline="javascript">
+    layui.use(['form', 'layer'], function(){
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery;
+
+        var userType = [[${userType}]];
+
+        // 自定义验证规则
+        form.verify({
+            newPwd: function(value){
+                if(value.length < 5){
+                    return '密码长度不能少于5位';
+                }
+            },
+            confirmPwd: function(value){
+                var newPassword = $('input[name="newPassword"]').val();
+                if(value !== newPassword){
+                    return '两次输入的密码不一致';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(submitPassword)', function(data){
+            $.ajax({
+                url: '/common/updatePassword',
+                method: 'post',
+                data: JSON.stringify({
+                    userType: userType,
+                    id: data.field.id,
+                    oldPassword: data.field.oldPassword,
+                    newPassword: data.field.newPassword
+                }),
+                contentType: "application/json;charset=utf-8",
+                dataType: 'json',
+                success: function (res) {
+                    if(res.code == 0){
+                        layer.msg(res.message || '密码修改成功，即将跳转到登录页', {icon: 1, time: 2000});
+                        setTimeout(function(){
+                            // 修改成功后跳转到登录页
+                            window.location.href = '/logout';
+                        }, 2000);
+                    }else{
+                        layer.msg(res.message || '密码修改失败，请检查原密码是否正确', {icon: 2, time: 2000});
+                    }
+                },
+                error: function(xhr, status, error) {
+                    layer.msg('请求失败：' + error, {icon: 2, time: 2000});
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

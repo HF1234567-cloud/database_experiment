@@ -56,4 +56,27 @@
         WHERE c.teacherId = #{teacherId}
         GROUP BY c.courseName
     </select>
+
+    <select id="selectTeacherById" resultType="com.kzl.entity.Teacher">
+        SELECT t.id, t.loginName, t.username, t.phone, t.email, t.roleId, t.collegeId,
+               c.name collegeName, r.name roleName
+        FROM teacher t
+        LEFT JOIN college c ON t.collegeId = c.id
+        LEFT JOIN role r ON t.roleId = r.id
+        WHERE t.id = #{id}
+    </select>
+
+    <update id="updateTeacherProfile" parameterType="com.kzl.entity.Teacher">
+        UPDATE teacher 
+        SET username = #{username}, phone = #{phone}, email = #{email}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectTeacherByIdAndPassword" resultType="com.kzl.entity.Teacher">
+        SELECT id FROM teacher WHERE id = #{id} AND password = #{password}
+    </select>
+
+    <update id="updateTeacherPassword">
+        UPDATE teacher SET password = #{newPassword} WHERE id = #{id}
+    </update>
 </mapper>

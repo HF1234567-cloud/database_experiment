@@ -88,4 +88,27 @@
         UPDATE course SET selected = selected + #{useNumber}
         WHERE id=#{id}
     </update>
+
+    <select id="selectStudentById" resultType="com.kzl.entity.Student">
+        SELECT s.id, s.studentNumber, s.username, s.phone, s.email, s.roleId, s.collegeId, 
+               c.name collegeName, r.name roleName
+        FROM student s
+        LEFT JOIN college c ON s.collegeId = c.id
+        LEFT JOIN role r ON s.roleId = r.id
+        WHERE s.id = #{id}
+    </select>
+
+    <update id="updateStudentProfile" parameterType="com.kzl.entity.Student">
+        UPDATE student 
+        SET username = #{username}, phone = #{phone}, email = #{email}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectStudentByIdAndPassword" resultType="com.kzl.entity.Student">
+        SELECT id FROM student WHERE id = #{id} AND password = #{password}
+    </select>
+
+    <update id="updateStudentPassword">
+        UPDATE student SET password = #{newPassword} WHERE id = #{id}
+    </update>
 </mapper>

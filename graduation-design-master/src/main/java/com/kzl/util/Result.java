@@ -69,6 +69,12 @@ public class Result<T> implements Serializable {
     public static Result createSuccess() {
         return create(ConstantEnum.SUCCESS.getCode(), ConstantEnum.SUCCESS.getMessage());
     }
+    
+    /*自定义成功消息*/
+    public static Result createSuccess(String message) {
+        return create(ConstantEnum.SUCCESS.getCode(), message);
+    }
+    
     /*添加数据成功*/
     public static Result addDataSuccess() {
         return create(ConstantEnum.ADD_DATA_SUCCESS.getCode(), ConstantEnum.ADD_DATA_SUCCESS.getMessage());

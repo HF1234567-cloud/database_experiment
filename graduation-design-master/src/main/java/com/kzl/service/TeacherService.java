@@ -30,4 +30,13 @@ public interface TeacherService {
     List<TeacherStatis> selectTeacherStatisList(String teacherId);
 
     List<TeacherStatis> selectCourseCountList(String teacherId);
+
+    //根据ID获取教师信息
+    Teacher getTeacherById(String id);
+
+    //更新教师基本资料
+    boolean updateTeacherProfile(Teacher teacher);
+
+    //修改教师密码
+    boolean updatePassword(String id, String oldPassword, String newPassword);
 }

@@ -234,4 +234,23 @@ public class ManageServiceImpl implements ManageService {
         }
         return b;
     }
+
+    @Override
+    public ManageUser getManageUserById(String id) {
+        return manageMapper.selectManageUserById(id);
+    }
+
+    @Override
+    public boolean updateManageUserProfile(ManageUser manageUser) {
+        return manageMapper.updateManageUserProfile(manageUser) > 0;
+    }
+
+    @Override
+    public boolean updatePassword(String id, String oldPassword, String newPassword) {
+        ManageUser manageUser = manageMapper.selectManageUserByIdAndPassword(id, oldPassword);
+        if (manageUser == null) {
+            return false;
+        }
+        return manageMapper.updateManageUserPassword(id, newPassword) > 0;
+    }
 }

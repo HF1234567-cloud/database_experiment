@@ -20,4 +20,12 @@ public interface TeacherMapper {
     List<TeacherStatis> selectTeacherStatisList(String teacherId);
 
     List<TeacherStatis> selectCourseCountList(String teacherId);
+
+    Teacher selectTeacherById(String id);
+
+    int updateTeacherProfile(Teacher teacher);
+
+    Teacher selectTeacherByIdAndPassword(String id, String password);
+
+    int updateTeacherPassword(String id, String newPassword);
 }

@@ -159,4 +159,25 @@
       INSERT INTO role(id,name,createDate,state)
       VALUES(#{id},#{name},#{createDate},#{state})
     </insert>
+
+    <select id="selectManageUserById" resultType="com.kzl.entity.ManageUser">
+        SELECT m.id, m.loginName, m.username, m.roleId, r.name roleName
+        FROM manage_user m
+        LEFT JOIN role r ON m.roleId = r.id
+        WHERE m.id = #{id}
+    </select>
+
+    <update id="updateManageUserProfile" parameterType="com.kzl.entity.ManageUser">
+        UPDATE manage_user 
+        SET username = #{username}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectManageUserByIdAndPassword" resultType="com.kzl.entity.ManageUser">
+        SELECT id FROM manage_user WHERE id = #{id} AND password = #{password}
+    </select>
+
+    <update id="updateManageUserPassword">
+        UPDATE manage_user SET password = #{newPassword} WHERE id = #{id}
+    </update>
 </mapper>

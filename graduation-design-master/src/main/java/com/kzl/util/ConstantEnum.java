@@ -2,16 +2,16 @@ package com.kzl.util;
 
 public enum ConstantEnum {
 
-    SUCCESS(200,"interface request success"),
-    FAIL(201,"interface request fail"),
-    ADD_DATA_SUCCESS(200,"添加数据成功"),
-    ADD_DATA_FAIL(201,"添加数据失败"),
-    UPDATE_DATA_SUCCESS(200,"修改数据成功"),
-    UPDATE_DATA_FAIL(201,"修改数据失败"),
-    DEL_DATA_SUCCESS(200,"删除数据成功"),
-    DEL_DATA_FAIL(201,"删除数据失败"),
-    MISSING_PARAMETER(201,"缺少参数"),
-    SERVER_ERROR(201,"服务异常"),
+    SUCCESS(0,"操作成功"),
+    FAIL(1,"操作失败"),
+    ADD_DATA_SUCCESS(0,"添加数据成功"),
+    ADD_DATA_FAIL(1,"添加数据失败"),
+    UPDATE_DATA_SUCCESS(0,"修改数据成功"),
+    UPDATE_DATA_FAIL(1,"修改数据失败"),
+    DEL_DATA_SUCCESS(0,"删除数据成功"),
+    DEL_DATA_FAIL(1,"删除数据失败"),
+    MISSING_PARAMETER(1,"缺少参数"),
+    SERVER_ERROR(1,"服务异常"),
 
 
     ;

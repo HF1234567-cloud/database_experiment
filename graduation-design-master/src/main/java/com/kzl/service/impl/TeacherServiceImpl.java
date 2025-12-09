@@ -94,4 +94,23 @@ public class TeacherServiceImpl implements TeacherService {
         return teacherMapper.selectCourseCountList(teacherId);
     }
 
+    @Override
+    public Teacher getTeacherById(String id) {
+        return teacherMapper.selectTeacherById(id);
+    }
+
+    @Override
+    public boolean updateTeacherProfile(Teacher teacher) {
+        return teacherMapper.updateTeacherProfile(teacher) > 0;
+    }
+
+    @Override
+    public boolean updatePassword(String id, String oldPassword, String newPassword) {
+        Teacher teacher = teacherMapper.selectTeacherByIdAndPassword(id, oldPassword);
+        if (teacher == null) {
+            return false;
+        }
+        return teacherMapper.updateTeacherPassword(id, newPassword) > 0;
+    }
+
 }

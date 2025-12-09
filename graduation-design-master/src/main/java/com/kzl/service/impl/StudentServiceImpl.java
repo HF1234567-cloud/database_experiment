@@ -109,4 +109,23 @@ public class StudentServiceImpl implements StudentService {
         return data;
     }
 
+    @Override
+    public Student getStudentById(String id) {
+        return studentMapper.selectStudentById(id);
+    }
+
+    @Override
+    public boolean updateStudentProfile(Student student) {
+        return studentMapper.updateStudentProfile(student) > 0;
+    }
+
+    @Override
+    public boolean updatePassword(String id, String oldPassword, String newPassword) {
+        Student student = studentMapper.selectStudentByIdAndPassword(id, oldPassword);
+        if (student == null) {
+            return false;
+        }
+        return studentMapper.updateStudentPassword(id, newPassword) > 0;
+    }
+
 }

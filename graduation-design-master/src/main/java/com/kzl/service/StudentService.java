@@ -22,4 +22,13 @@ public interface StudentService {
     //查询选课统计
     Map queryCourseSeletedCount(Student user);
 
+    //根据ID获取学生信息
+    Student getStudentById(String id);
+
+    //更新学生基本资料
+    boolean updateStudentProfile(Student student);
+
+    //修改学生密码
+    boolean updatePassword(String id, String oldPassword, String newPassword);
+
 }
