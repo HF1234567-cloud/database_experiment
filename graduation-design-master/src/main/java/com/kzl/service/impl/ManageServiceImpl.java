@@ -110,6 +110,11 @@ public class ManageServiceImpl implements ManageService {
     }
 
     @Override
+    public boolean deleteInformation(String id) {
+        return manageMapper.deleteInformation(id);
+    }
+
+    @Override
     public List<Teacher> queryTeacherList(Teacher teacher) {
         List<Teacher> teachers = manageMapper.selectTeacherList(teacher);
         return teachers;

@@ -50,10 +50,11 @@
             ]
         });
 
-        //是否禁用按钮
+        //操作列按钮
         function complain(d){
             return [
                 '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateInformation(\''+ d.id + '\')">查询/修改</button>',
+                '<button type="button" style="margin-left: 8px;text-align: center" class="layui-btn layui-btn-sm layui-btn-danger" onclick="deleteInformation(\''+ d.id + '\')">删除</button>'
             ]
                 .join('');
         };
@@ -66,6 +67,30 @@
         //新增跳转页面
         window.addInformation = function () {
             window.location.href="/manage/informationDetail";
+        };
+
+        //删除资讯
+        window.deleteInformation = function (id) {
+            layer.confirm('确定要删除该资讯吗？', {icon: 3, title:'提示'}, function(index){
+                $.ajax({
+                    url: '/manage/deleteInformation',
+                    type: 'post',
+                    data: {id: id},
+                    success: function (res) {
+                        // 统一与其他管理页面风格：code 为失败码(如201)时认为失败，其余视为成功
+                        if(res && res.code == '201'){
+                            layer.msg(res.data || res.message || '删除失败');
+                        }else{
+                            layer.msg('删除成功');
+                            tableIns.reload();
+                        }
+                    },
+                    error: function () {
+                        layer.msg('请求出错，删除失败');
+                    }
+                });
+                layer.close(index);
+            });
         };
     });
 </script>

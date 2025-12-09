@@ -52,18 +52,83 @@
             ]
         });
 
-        //是否禁用按钮
+        //是否禁用 + 修改按钮
         function complain(d){
-            var returnData;
+            var stateBtn;
             if(d.state == "1"){
-                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>'
+                stateBtn = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">正常</button>';
             }else{
-                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>'
+                stateBtn = '<button type="button" style="text-align: center" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateCollegeState(&quot;'+ d.id + '&quot;,'+ d.state+')">禁用</button>';
             }
-            return [
-                returnData
-            ]
-                .join('');
+            var editBtn = '<button type="button" style="margin-left: 8px;text-align: center" class="layui-btn layui-btn-normal layui-btn-sm" onclick="editCollege(\''+ d.id + '\',\''+ (d.name||'') + '\',\''+ (d.teacherNum||0) + '\',\''+ (d.studentNum||0) + '\')">修改</button>';
+            return stateBtn + editBtn;
+        };
+
+        //弹出框-修改学院（名称、教师人数、学生人数）
+        window.editCollege = function(id, name, teacherNum, studentNum){
+            var contentHtml = '' +
+                '<div class="layui-form" style="margin: 20px 20px 0 20px;">' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">学院名称</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editCollegeName" value="'+ (name||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">教师数量</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="number" id="editTeacherNum" value="'+ (teacherNum||0) +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">学生数量</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="number" id="editStudentNum" value="'+ (studentNum||0) +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '</div>';
+
+            layer.open({
+                type: 1,
+                title: '修改学院信息',
+                area: ['420px', '320px'],
+                content: contentHtml,
+                btn: ['保存', '取消'],
+                yes: function(index){
+                    var newName = $('#editCollegeName').val();
+                    var newTeacherNum = $('#editTeacherNum').val();
+                    var newStudentNum = $('#editStudentNum').val();
+
+                    var data = {
+                        'id': id,
+                        'name': newName,
+                        'teacherNum': newTeacherNum,
+                        'studentNum': newStudentNum
+                    };
+                    data = JSON.stringify(data);
+                    $.ajax({
+                        url: '/manage/updateCollege',
+                        method: 'post',
+                        data: data,
+                        contentType: 'application/json;charset=utf-8',
+                        traditional: true,
+                        dataType: 'text',
+                        success: function(res){
+                            res = JSON.parse(res);
+                            if(res.code == '201'){
+                                layer.msg(res.data || '修改学院信息失败');
+                            }else{
+                                layer.msg(res.data || '修改学院信息成功');
+                                tableIns.reload();
+                                layer.close(index);
+                            }
+                        },
+                        error: function(){
+                            layer.msg('请求出错，修改失败');
+                        }
+                    });
+                }
+            });
         };
 
         //修改学院使用状态

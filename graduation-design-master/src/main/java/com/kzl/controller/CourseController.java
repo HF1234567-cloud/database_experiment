@@ -30,9 +30,15 @@ public class CourseController {
     public ModelAndView course(HttpServletRequest request){
         ModelAndView modelAndView = new ModelAndView();
         List<Map> colleges = service.selectCollegeList();
+        // 查询课程学年列表，用于课程管理页学年下拉框
+        List<CourseAcademicYear> courseAcademicYears = courseService.queryCourseAcademicYearList();
+        // 查询教师列表，用于课程编辑时选择上课教师
+        List<Map> teacherList = courseService.selectTeacherList();
         boolean state = ManageController.judgeUserLoginState(request);
         modelAndView.setViewName(state?"manage/course":"redirect:/");
         modelAndView.addObject("collegeList",colleges);
+        modelAndView.addObject("courseAcademicYears", courseAcademicYears);
+        modelAndView.addObject("teacherList", teacherList);
         return modelAndView;
     }
 
@@ -43,6 +49,7 @@ public class CourseController {
         Course course = new Course();
         course.setCourseName(request.getParameter("courseName"));
         course.setCollegeId(request.getParameter("collegeId"));
+        course.setAcademicYear(request.getParameter("academicYear"));
         List<Course> courses = courseService.queryCourseList(course);
         return Result.create(0,"",courses);
     }
