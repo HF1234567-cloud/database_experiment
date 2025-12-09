@@ -94,6 +94,10 @@
                 var classDate = courses[i].classDate;
                 var classPlace = courses[i].classPlace;
                 var courseId = courses[i].id;
+                // 将\r\n转换为<br>标签以正确显示换行
+                if(remark) {
+                    remark = remark.replace(/\\r\\n/g, '<br>').replace(/\\n/g, '<br>').replace(/\\r/g, '<br>');
+                }
                 // 上课时间重新赋值
                 document.getElementById('date'+courseId).innerHTML = classDate;
                 // 上课地点重新赋值

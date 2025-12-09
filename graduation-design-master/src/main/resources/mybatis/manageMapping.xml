@@ -183,9 +183,9 @@
     </insert>
 
     <select id="selectManageUserById" resultType="com.kzl.entity.ManageUser">
-        SELECT m.id, m.loginName, m.username, m.roleId, r.name roleName
+        SELECT m.id, m.loginname AS "loginName", m.username, m.roleid AS "roleId", r.name AS "roleName"
         FROM manage_user m
-        LEFT JOIN role r ON m.roleId = r.id
+        LEFT JOIN role r ON m.roleid = r.id
         WHERE m.id = #{id}
     </select>
 

@@ -90,11 +90,11 @@
     </update>
 
     <select id="selectStudentById" resultType="com.kzl.entity.Student">
-        SELECT s.id, s.studentNumber, s.username, s.phone, s.email, s.roleId, s.collegeId, 
-               c.name collegeName, r.name roleName
+        SELECT s.id, s.studentnumber AS "studentNumber", s.username, s.phone, s.email, s.roleid AS "roleId", s.collegeid AS "collegeId", 
+               c.name AS "collegeName", r.name AS "roleName"
         FROM student s
-        LEFT JOIN college c ON s.collegeId = c.id
-        LEFT JOIN role r ON s.roleId = r.id
+        LEFT JOIN college c ON s.collegeid = c.id
+        LEFT JOIN role r ON s.roleid = r.id
         WHERE s.id = #{id}
     </select>
 

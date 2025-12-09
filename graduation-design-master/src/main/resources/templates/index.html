@@ -56,6 +56,10 @@
             $ = layui.jquery;
         layer.ready(function(){
             var content = [[${information.content}]];
+            // 将\r\n转换为<br>标签以正确显示换行
+            if(content) {
+                content = content.replace(/\\r\\n/g, '<br>').replace(/\\n/g, '<br>').replace(/\\r/g, '<br>');
+            }
             document.getElementById('content').innerHTML = content;
         });
     });
