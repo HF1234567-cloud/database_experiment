@@ -17,9 +17,9 @@ public interface TeacherMapper {
 
     List<CourseAcademicYear> selectCourseAcademicYearList();
 
-    List<TeacherStatis> selectTeacherStatisList(String teacherId);
+    List<TeacherStatis> selectTeacherStatisList(@Param("teacherId") String teacherId, @Param("academicYear") String academicYear);
 
-    List<TeacherStatis> selectCourseCountList(String teacherId);
+    List<TeacherStatis> selectCourseCountList(@Param("teacherId") String teacherId, @Param("academicYear") String academicYear);
 
     Teacher selectTeacherById(String id);
 

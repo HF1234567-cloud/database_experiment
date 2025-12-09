@@ -46,7 +46,9 @@
             LEFT JOIN course c ON c.id=sc.courseId
             LEFT JOIN student s ON s.id = sc.studentId
             LEFT JOIN college cu ON cu.id = c.collegeId
-        WHERE c.teacherId=#{teacherId} GROUP BY name
+        WHERE c.teacherId=#{teacherId}
+          AND c.academicYear = #{academicYear}
+        GROUP BY cu.name
    </select>
 
     <select id="selectCourseCountList" resultType="com.kzl.entity.TeacherStatis">
@@ -54,6 +56,7 @@
         FROM course c
         LEFT JOIN student_course_rel sc ON c.id = sc.courseId
         WHERE c.teacherId = #{teacherId}
+          AND c.academicYear = #{academicYear}
         GROUP BY c.courseName
     </select>
 

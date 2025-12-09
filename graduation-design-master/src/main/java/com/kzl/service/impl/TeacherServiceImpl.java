@@ -76,6 +76,7 @@ public class TeacherServiceImpl implements TeacherService {
     public List<CourseAcademicYear> selectCourseYearList(String courseAcademicYearId) {
         List<CourseAcademicYear> courseAcademicYears = teacherMapper.selectCourseAcademicYearList();
         for(CourseAcademicYear courseAcademicYear : courseAcademicYears){
+            courseAcademicYear.setAcademicYearName(courseAcademicYear.getAcademicYear());
             courseAcademicYear.setType("0");
             if(courseAcademicYearId.equals(courseAcademicYear.getId())){
                 courseAcademicYear.setType("1");
@@ -84,14 +85,14 @@ public class TeacherServiceImpl implements TeacherService {
         return courseAcademicYears;
     }
     @Override
-    public List<TeacherStatis> selectTeacherStatisList(String teacherId){
-        List<TeacherStatis>teacherStatiss=teacherMapper.selectTeacherStatisList(teacherId);
+    public List<TeacherStatis> selectTeacherStatisList(String teacherId, String academicYear){
+        List<TeacherStatis> teacherStatiss = teacherMapper.selectTeacherStatisList(teacherId, academicYear);
         return teacherStatiss;
     }
 
     @Override
-    public List<TeacherStatis> selectCourseCountList(String teacherId) {
-        return teacherMapper.selectCourseCountList(teacherId);
+    public List<TeacherStatis> selectCourseCountList(String teacherId, String academicYear) {
+        return teacherMapper.selectCourseCountList(teacherId, academicYear);
     }
 
     @Override

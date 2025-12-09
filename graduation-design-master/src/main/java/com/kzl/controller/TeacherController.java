@@ -78,6 +78,11 @@ public class TeacherController {
         Teacher user = (Teacher) request.getSession().getAttribute("user");
         CourseAcademicYear currentYear = studentService.getCourseAcademicYear();
         List<CourseAcademicYear> academicYears = teacherService.selectCourseYearList(currentYear.getId());
+        if (academicYears == null || academicYears.isEmpty()) {
+            // 如果学年列表为空，至少加入当前学年，避免下拉框为空
+            academicYears = new java.util.ArrayList<>();
+            academicYears.add(currentYear);
+        }
         List<Course> courses = teacherService.selectCourseListByTeacherId(user.getId());
 
         modelAndView.setViewName("teacher/scoreInfo");
@@ -123,6 +128,11 @@ public class TeacherController {
         Teacher user = (Teacher) request.getSession().getAttribute("user");
         CourseAcademicYear courseAcademicYear = studentService.getCourseAcademicYear();
         List<CourseAcademicYear> courseAcademicYears = teacherService.selectCourseYearList(courseAcademicYear.getId());
+        if (courseAcademicYears == null || courseAcademicYears.isEmpty()) {
+            // 如果学年列表为空，至少加入当前学年，避免下拉框为空
+            courseAcademicYears = new java.util.ArrayList<>();
+            courseAcademicYears.add(courseAcademicYear);
+        }
         List<Course> courses = teacherService.selectCourseList(user.getId(), courseAcademicYear.getAcademicYear());
         modelAndView.setViewName("teacher/selectedCourseStu");
         modelAndView.addObject("courseAcademicYears",courseAcademicYears);
@@ -158,8 +168,9 @@ public class TeacherController {
         if (state ==  true)
         {
             Teacher user = (Teacher) request.getSession().getAttribute("user");
-            List<TeacherStatis> CoutStudent_collage = teacherService.selectTeacherStatisList(user.getId());
-            List<TeacherStatis> courseCountList = teacherService.selectCourseCountList(user.getId());
+            CourseAcademicYear currentYear = studentService.getCourseAcademicYear();
+            List<TeacherStatis> CoutStudent_collage = teacherService.selectTeacherStatisList(user.getId(), currentYear.getAcademicYear());
+            List<TeacherStatis> courseCountList = teacherService.selectCourseCountList(user.getId(), currentYear.getAcademicYear());
             modelAndView.setViewName("teacher/statisticalInfo");
             modelAndView.addObject("TeacherStatis", CoutStudent_collage);
             modelAndView.addObject("CourseStatis", courseCountList);
