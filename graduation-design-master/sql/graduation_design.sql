@@ -58,6 +58,7 @@ CREATE TABLE `course`  (
   `primaryAmount` int(10) NOT NULL COMMENT '预选人数',
   `selected` int(10) NOT NULL COMMENT '选中人数',
   `remark` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '课程说明',
+  `state` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '状态 0禁用 1正常',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '课程' ROW_FORMAT = Dynamic;
 

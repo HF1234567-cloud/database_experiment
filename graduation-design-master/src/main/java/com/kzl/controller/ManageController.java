@@ -8,6 +8,7 @@ import com.kzl.service.RegisterService;
 import com.kzl.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -151,9 +152,14 @@ public class ManageController {
         //通过id查询出具体的数据
         String id = request.getParameter("id");
         modelAndView.setViewName("manage/informationDetail");
-        Information information = null;
-        if(id != null){
-            information= manageService.queryInformationById(id);
+        Information information;
+        if(StringUtils.hasText(id)){
+            information = manageService.queryInformationById(id);
+            if(information == null){
+                information = new Information();
+            }
+        }else{
+            information = new Information();
         }
         modelAndView.addObject("information",information);
         return modelAndView;
@@ -170,7 +176,19 @@ public class ManageController {
     //添加资讯信息
     @ResponseBody
     @RequestMapping("addInformation")
-    public Result addInformation(@RequestBody Information information){
+    public Result addInformation(@RequestBody Information information, HttpServletRequest request){
+        if(information == null || !StringUtils.hasText(information.getTitle()) || !StringUtils.hasText(information.getContent())){
+            return Result.createFail("请填写完整的资讯标题和内容");
+        }
+        if(!StringUtils.hasText(information.getRoleId())){
+            ManageUser user = (ManageUser) request.getSession().getAttribute("user");
+            if(user != null && StringUtils.hasText(user.getRoleId())){
+                information.setRoleId(user.getRoleId());
+            }
+        }
+        if(!StringUtils.hasText(information.getRoleId())){
+            return Result.createFail("请选择资讯展示端");
+        }
         boolean b = manageService.addInformation(information);
         return b?Result.createSuccess("添加资讯信息成功"):Result.createFail("添加资讯信息失败");
     }

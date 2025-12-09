@@ -1,20 +1,21 @@
- <!DOCTYPE HTML>
- <html xmlns:th="http://www.thymeleaf.org">
-<left_column>
-    <footer th:fragment="common_left(menuList)">
-        <div class="layui-side layui-bg-black">
-            <div class="layui-side-scroll">
-                <ul class="layui-nav layui-nav-tree"  lay-filter="test">
-
-                    <li class="layui-nav-item " th:each="menu : ${menuList}">
-                        <a th:href="@{${menu.href}}">[[${menu.name}]]</a>
-                        <dl class="layui-nav-child" th:if="${#lists.size(menu.menus)} gt 0">
-                            <dd th:each="menus : ${menu.menus}"><a th:href="@{${menus.href}}">[[${menus.name}]]</a></dd>
-                        </dl>
-                    </li>
-                </ul>
-            </div>
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="left_column(menuList)">
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="menu">
+                <li class="layui-nav-item" th:each="menu : ${menuList}">
+                    <a th:attr="href=${#strings.isEmpty(menu.href) ? '#' : menu.href}">[[${menu.name}]]</a>
+                    <dl class="layui-nav-child" th:if="${#lists.size(menu.menus)} gt 0">
+                        <dd th:each="menus : ${menu.menus}">
+                            <a th:attr="href=${#strings.isEmpty(menus.href) ? '#' : menus.href}">[[${menus.name}]]</a>
+                        </dd>
+                    </dl>
+                </li>
+            </ul>
         </div>
-    </footer>
-</left_column>
+    </div>
+</footer>
+</body>
 </html>

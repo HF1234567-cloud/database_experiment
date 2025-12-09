@@ -15,9 +15,11 @@
     </select>
 
     <select id="selectInformationByRoleId" resultType="com.kzl.entity.Information">
-        SELECT id,title,content,publishDate
+        SELECT id,title,"content" AS "content",publishDate
         FROM information
         WHERE roleId = #{roleId}
+        ORDER BY publishDate DESC
+        LIMIT 1
     </select>
 
     <select id="selectMenuList" resultType="com.alibaba.fastjson.JSONObject">
@@ -58,26 +60,26 @@
     </select>
 
     <select id="selectInformationList" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT i.id id, i.title title, i.content content, i.publishDate publishDate, i.roleId roleId, r.name roleName
+        SELECT i.id id, i.title title, i."content" AS "content", i.publishDate publishDate, i.roleId roleId, r.name roleName
         FROM information i
         LEFT JOIN role r ON r.id = i.roleId
     </select>
 
 
     <select id="selectInformationById" resultType="com.kzl.entity.Information">
-        SELECT i.id id, i.title title, i.content content, i.publishDate publishDate, i.roleId roleId, r.name roleName
+        SELECT i.id id, i.title title, i."content" AS "content", i.publishDate publishDate, i.roleId roleId, r.name roleName
         FROM information i
         LEFT JOIN role r ON r.id = i.roleId
         WHERE i.id=#{id}
     </select>
 
     <update id="updateInformation" parameterType="com.kzl.entity.Information">
-        UPDATE information SET title=#{title}, content=#{content}
+        UPDATE information SET title=#{title}, "content"=#{content}
         WHERE id=#{id}
     </update>
 
     <insert id="addInformation" parameterType="com.kzl.entity.Information">
-        INSERT INTO information(id,title,content,publishDate,roleId)
+        INSERT INTO information(id,title,"content",publishDate,roleId)
         VALUES(#{id},#{title},#{content},#{publishDate},#{roleId})
     </insert>
 
