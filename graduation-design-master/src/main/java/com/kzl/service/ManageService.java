@@ -44,6 +44,9 @@ public interface ManageService {
     //添加首页资讯信息
     boolean addInformation(Information information);
 
+    //删除资讯信息
+    boolean deleteInformation(String id);
+
     //查询教师信息列表
     List<Teacher> queryTeacherList(Teacher teacher);
 

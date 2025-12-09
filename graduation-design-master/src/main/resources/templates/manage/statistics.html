@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>数据统计</title>
+    <link href="../../static/css/index.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--头部导航栏-->
+    <div id="head" th:include="common/header :: common_head(user=${session.user})"></div>
+    <!--左边菜单栏-->
+    <div id="left_column" th:include="common/left_column :: left_column(menuList=${session.menuList})"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            <div class="college_cloum">
+                <div class="college_title">数据统计总览</div>
+                <hr>
+
+                <!-- 顶部关键指标卡片 -->
+                <div class="layui-row layui-col-space15" id="stat-cards">
+                    <div class="layui-col-md2">
+                        <div class="layui-card">
+                            <div class="layui-card-header">学生总数</div>
+                            <div class="layui-card-body" id="studentTotal">-</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <div class="layui-card">
+                            <div class="layui-card-header">教师总数</div>
+                            <div class="layui-card-body" id="teacherTotal">-</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <div class="layui-card">
+                            <div class="layui-card-header">学院总数</div>
+                            <div class="layui-card-body" id="collegeTotal">-</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <div class="layui-card">
+                            <div class="layui-card-header">课程总数</div>
+                            <div class="layui-card-body" id="courseTotal">-</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <div class="layui-card">
+                            <div class="layui-card-header">资讯总数</div>
+                            <div class="layui-card-body" id="informationTotal">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;"></div>
+
+                <!-- 图表区域：学生/教师人数对比 & 各学年选课人数 -->
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <fieldset class="layui-elem-field">
+                            <legend>学生 / 教师人数对比</legend>
+                            <div class="layui-field-box">
+                                <div id="chartStuTea" style="width: 100%; height: 400px;"></div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="layui-col-md6">
+                        <fieldset class="layui-elem-field">
+                            <legend>各学年选课人数</legend>
+                            <div class="layui-field-box">
+                                <div id="chartCourseYear" style="width: 100%; height: 400px;"></div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <!-- 表格区域：选课人数TopN & 资讯按展示端统计，同一行并列展示 -->
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <fieldset class="layui-elem-field">
+                            <legend>选课人数 Top N 课程</legend>
+                            <div class="layui-field-box">
+                                <table class="layui-table">
+                                    <thead>
+                                    <tr>
+                                        <th>课程名称</th>
+                                        <th>学年</th>
+                                        <th>选课人数</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="topCourseBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="layui-col-md6">
+                        <fieldset class="layui-elem-field">
+                            <legend>资讯按展示端统计</legend>
+                            <div class="layui-field-box">
+                                <table class="layui-table">
+                                    <thead>
+                                    <tr>
+                                        <th>展示端</th>
+                                        <th>资讯数量</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="informationByRoleBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/layui/layui.all.js"></script>
+<script>
+    layui.use(['layer'], function(){
+        var layer = layui.layer,
+            $ = layui.jquery;
+
+        function loadStatistics(){
+            $.ajax({
+                url: '/manage/statisticsData',
+                type: 'get',
+                success: function (res) {
+                    if(res && res.code == 200){
+                        var data = res.data || {};
+                        // 顶部卡片
+                        $('#studentTotal').text(data.studentTotal || 0);
+                        $('#teacherTotal').text(data.teacherTotal || 0);
+                        $('#collegeTotal').text(data.collegeTotal || 0);
+                        $('#courseTotal').text(data.courseTotal || 0);
+                        $('#informationTotal').text(data.informationTotal || 0);
+
+                        // 图表：学生 / 教师人数对比（饼图）
+                        var chartStuTeaDom = document.getElementById('chartStuTea');
+                        if(chartStuTeaDom){
+                            var chartStuTea = echarts.init(chartStuTeaDom);
+                            var stuTeaOption = {
+                                tooltip: {
+                                    trigger: 'item'
+                                },
+                                legend: {
+                                    orient: 'vertical',
+                                    left: 'left'
+                                },
+                                series: [{
+                                    name: '人数',
+                                    type: 'pie',
+                                    radius: '60%',
+                                    data: [
+                                        {value: data.studentTotal || 0, name: '学生'},
+                                        {value: data.teacherTotal || 0, name: '教师'}
+                                    ]
+                                }]
+                            };
+                            chartStuTea.setOption(stuTeaOption);
+                        }
+
+                        // 图表：各学年选课人数柱状图
+                        var years = [];
+                        var yearSelected = [];
+                        (data.courseByAcademicYear || []).forEach(function(item){
+                            years.push(item.academicYear || '-');
+                            yearSelected.push(item.totalSelected || 0);
+                        });
+                        var chartCourseYearDom = document.getElementById('chartCourseYear');
+                        if(chartCourseYearDom){
+                            var chartCourseYear = echarts.init(chartCourseYearDom);
+                            var courseYearOption = {
+                                tooltip: {},
+                                xAxis: { type: 'category', data: years },
+                                yAxis: { type: 'value', name: '选课人数' },
+                                series: [{
+                                    type: 'bar',
+                                    data: yearSelected
+                                }]
+                            };
+                            chartCourseYear.setOption(courseYearOption);
+                        }
+
+                        // 课程按学年统计表
+                        var courseYearHtml = '';
+                        (data.courseByAcademicYear || []).forEach(function(item){
+                            courseYearHtml += '<tr><td>' + (item.academicYear || '-') + '</td>' +
+                                '<td>' + (item.courseCount || 0) + '</td>' +
+                                '<td>' + (item.totalSelected || 0) + '</td></tr>';
+                        });
+                        $('#courseByYearBody').html(courseYearHtml);
+
+                        // 选课人数 Top N 课程表
+                        var topCourseHtml = '';
+                        (data.topCourseBySelected || []).forEach(function(item){
+                            topCourseHtml += '<tr><td>' + (item.courseName || '-') + '</td>' +
+                                '<td>' + (item.academicYear || '-') + '</td>' +
+                                '<td>' + (item.selected || 0) + '</td></tr>';
+                        });
+                        $('#topCourseBody').html(topCourseHtml);
+
+                        // 资讯按展示端
+                        var infoHtml = '';
+                        (data.informationByRole || []).forEach(function(item){
+                            infoHtml += '<tr><td>' + (item.roleName || '-') + '</td><td>' + (item.total || 0) + '</td></tr>';
+                        });
+                        $('#informationByRoleBody').html(infoHtml);
+                    }else{
+                        layer.msg(res.message || '统计数据获取失败');
+                    }
+                },
+                error: function () {
+                    layer.msg('统计数据获取失败');
+                }
+            });
+        }
+
+        loadStatistics();
+    });
+</script>
+</body>
+</html>

@@ -10,8 +10,11 @@
         LEFT JOIN college c ON s.collegeId = c.id
         LEFT JOIN teacher t ON t.id=s.teacherId
         WHERE 1=1
-        <if test="collegeId!=null and collegeId!=''">AND s.collegeId = #{collegeId}</if>
+        <!-- collegeId 为 0 时表示“请选择学院”，不参与筛选 -->
+        <if test="collegeId!=null and collegeId!='' and collegeId!='0'">AND s.collegeId = #{collegeId}</if>
         <if test="courseName!=null and courseName!=''">AND s.courseName = #{courseName}</if>
+        <if test="academicYear!=null and academicYear!=''">AND s.academicYear = #{academicYear}</if>
+
         ORDER BY s.academicYear DESC
     </select>
 
@@ -19,23 +22,12 @@
         UPDATE course
         <trim prefix="set" suffixOverrides=",">
             <if test="courseName != null and courseName!=''">courseName=#{courseName},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
             <if test="credits != null and credits!=''">credits=#{credits},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
             <if test="optional != null and optional!=''">optional=#{optional},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
             <if test="classPlace != null and classPlace!=''">classPlace=#{classPlace},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
             <if test="classDate != null and classDate!=''">classDate=#{classDate},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
+            <if test="teacherId != null and teacherId!=''">teacherId=#{teacherId},</if>
             <if test="remark != null and remark!=''">remark=#{remark},</if>
-        </trim>
-        <trim prefix="set" suffixOverrides=",">
             <if test="state != null and state!=''">state=#{state},</if>
         </trim>
         WHERE id=#{id}

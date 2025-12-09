@@ -33,6 +33,8 @@ public interface ManageMapper {
 
     boolean addInformation(Information information);
 
+    boolean deleteInformation(String id);
+
     List<Teacher> selectTeacherList(Teacher teacher);
 
     boolean updateTeacher(Teacher teacher);

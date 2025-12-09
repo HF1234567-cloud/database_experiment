@@ -21,9 +21,18 @@
                     <!--课程管理 <hr>-->
                     <div class="college_title">课程管理</div>
                     <div class="college_add"><button type="button" class="layui-btn" onclick="addCourse()">添加课程</button></div>
-                    <div class="college_add course_academic_year_tip">当前可以选择的课程学年:2020下半学年</div>
+                    <div class="college_add course_academic_year_tip">
+                        <span class="name_title">课程学年:</span>
+                        <!-- 只显示当前学年（state 为 '1' 的那条），不提供下拉选择 -->
+                        <div th:each="year : ${courseAcademicYears}" th:if="${year.state == '1'}">
+                            <span th:text="${year.academicYear}"></span>
+                            <input type="hidden" id="academicYearSelect" name="academicYearSelect" th:value="${year.academicYear}" />
+                        </div>
+                    </div>
+
                     <hr>
                 </div>
+
                 <div class="search_top">
                     <div class="dropdown search_college">
                         <span class="name_title">选择学院:</span>
@@ -32,6 +41,12 @@
                             <option th:each="college : ${collegeList}" th:value="${college.id}" th:text="${college.name}" />
                         </select>
                     </div>
+
+                    <!-- 隐藏的教师列表，用于编辑课程时选择上课教师 -->
+                    <select id="teacherTag" style="display:none;">
+                        <option value="">请选择教师</option>
+                        <option th:each="teacher : ${teacherList}" th:value="${teacher.id}" th:text="${teacher.username}" />
+                    </select>
 
                     <div class="search_name">
                         <span class="name_title">课程名称:</span>
@@ -62,6 +77,9 @@
         var tableIns = table.render({
             elem: '#course',
             url:'/course/courseList',
+            // 首次加载时不过滤任何条件，展示所有课程（不按学年、不按学院过滤）
+            where: {},
+
             cols: [
                 [
                     {field:'courseName', title:'课程名称', edit: 'text'},
@@ -80,18 +98,16 @@
             id: 'courseReload',
         });
 
-        //删除课程
+        //删除课程 + 修改按钮
         function complain(d){
-            var returnData;
+            var delBtn;
             if(d.state == "1"){
-                returnData = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">删除</button>'
+                delBtn = '<button type="button" style="text-align: center" class="layui-btn layui-btn-sm" onclick="updateRoleState(\''+ d.id + '\','+ d.state+')">删除</button>';
             }else{
-                returnData = '<button type="button" style="text-align: center;" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateRoleState(&quot;'+ d.id + '&quot;,'+ d.state+')">已删除</button>'
+                delBtn = '<button type="button" style="text-align: center;" class="layui-btn layui-btn-danger layui-btn-sm" onclick="updateRoleState(\''+ d.id + '\','+ d.state+')">已删除</button>';
             }
-            return [
-                returnData
-            ]
-                .join('');
+            var editBtn = '<button type="button" style="margin-left: 8px;text-align: center" class="layui-btn layui-btn-normal layui-btn-sm" onclick="editCourse(\''+ d.id + '\',\''+ (d.courseName||'') + '\',\''+ (d.credits||'') + '\',\''+ (d.optional||'') + '\',\''+ (d.classPlace||'') + '\',\''+ (d.classDate||'') + '\',\''+ (d.remark||'') + '\',\''+ (d.teacherId||'') + '\',\''+ (d.teacherName||'') + '\')">修改</button>';
+            return delBtn + editBtn;
 
         };
 
@@ -126,17 +142,134 @@
             });
         };
 
+        //编辑课程信息（名称、学分、可选人数、地点、时间、说明、上课教师）
+        window.editCourse = function (id, courseName, credits, optional, classPlace, classDate, remark, teacherId, teacherName) {
+
+            var contentHtml = '' +
+                '<div class="layui-form" style="margin: 20px 20px 0 20px;">' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">课程名称</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editCourseName" value="'+ (courseName||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">学分</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="number" id="editCredits" value="'+ (credits||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">可选人数</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="number" id="editOptional" value="'+ (optional||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">上课地点</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editClassPlace" value="'+ (classPlace||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">上课时间</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editClassDate" value="'+ (classDate||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">上课教师</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editTeacherName" value="'+ (teacherName||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="layui-form-item">' +
+                '    <label class="layui-form-label">课程说明</label>' +
+                '    <div class="layui-input-block">' +
+                '      <input type="text" id="editRemark" value="'+ (remark||'') +'" autocomplete="off" class="layui-input" />' +
+                '    </div>' +
+                '</div>' +
+                '</div>';
+
+            layer.open({
+                type: 1,
+                title: '修改课程信息',
+                area: ['460px', '420px'],
+                content: contentHtml,
+                btn: ['保存', '取消'],
+                yes: function(index){
+                    var newCourseName = $('#editCourseName').val();
+                    var newCredits = $('#editCredits').val();
+                    var newOptional = $('#editOptional').val();
+                    var newClassPlace = $('#editClassPlace').val();
+                    var newClassDate = $('#editClassDate').val();
+                    var newTeacherName = $('#editTeacherName').val().trim();
+                    var newRemark = $('#editRemark').val();
+
+                    // 通过教师姓名在隐藏下拉中匹配teacherId
+                    var newTeacherId = '';
+                    $('#teacherTag option').each(function(){
+                        var val = $(this).val();
+                        var text = $(this).text();
+                        if(text === newTeacherName){
+                            newTeacherId = val;
+                        }
+                    });
+
+                    var data = {
+                        'id': id,
+                        'courseName': newCourseName,
+                        'credits': newCredits,
+                        'optional': newOptional,
+                        'classPlace': newClassPlace,
+                        'classDate': newClassDate,
+                        'remark': newRemark
+                    };
+                    if(newTeacherId){
+                        data['teacherId'] = newTeacherId;
+                    }
+
+                    data = JSON.stringify(data);
+                    $.ajax({
+                        url: '/course/updateCourse',
+                        method: 'post',
+                        data: data,
+                        contentType: 'application/json;charset=utf-8',
+                        traditional: true,
+                        dataType: 'text',
+                        success: function(res){
+                            res = JSON.parse(res);
+                            if(res.code == '201'){
+                                layer.msg(res.data || '修改课程信息失败');
+                            }else{
+                                layer.msg(res.data || '修改课程信息成功');
+                                tableIns.reload();
+                                layer.close(index);
+                            }
+                        },
+                        error: function(){
+                            layer.msg('请求出错，修改失败');
+                        }
+                    });
+                }
+            });
+        };
 
         var active = {
             reload: function(){
                 var courseName = $('#courseName');
                 var collegeId = $('select[name="tag"] option:selected').val();
-                //执行重载
+
+                // 只在搜索时按课程名和（可选的）学院过滤，不按学年过滤
+                var whereObj = {
+                    'courseName': courseName.val()
+                };
+                if (collegeId && collegeId !== '0') {
+                    whereObj['collegeId'] = collegeId;
+                }
+
                 table.reload('courseReload', {
-                    where: {
-                        'courseName': courseName.val(),
-                        'collegeId':collegeId
-                    }
+                    where: whereObj
                 }, 'data');
             }
         };

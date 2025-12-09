@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kzl.dao.StatisticsMapper">
+
+    <!-- 顶部总览统计 -->
+    <select id="countStudents" resultType="long">
+        SELECT COUNT(1) FROM student
+    </select>
+
+    <select id="countTeachers" resultType="long">
+        SELECT COUNT(1) FROM teacher
+    </select>
+
+    <select id="countColleges" resultType="long">
+        SELECT COUNT(1) FROM college
+    </select>
+
+    <select id="countCourses" resultType="long">
+        SELECT COUNT(1) FROM course
+    </select>
+
+    <select id="countInformation" resultType="long">
+        SELECT COUNT(1) FROM information
+    </select>
+
+    <!-- 学生按学院分布 -->
+    <select id="countStudentByCollege" resultType="java.util.HashMap">
+        SELECT c.name AS collegeName, COUNT(s.id) AS total
+        FROM college c
+        LEFT JOIN student s ON s.collegeId = c.id
+        GROUP BY c.name
+        ORDER BY total DESC
+    </select>
+
+    <!-- 教师按学院分布 -->
+    <select id="countTeacherByCollege" resultType="java.util.HashMap">
+        SELECT c.name AS collegeName, COUNT(t.id) AS total
+        FROM college c
+        LEFT JOIN teacher t ON t.collegeId = c.id
+        GROUP BY c.name
+        ORDER BY total DESC
+    </select>
+
+    <!-- 资讯按展示端分布 -->
+    <select id="countInformationByRole" resultType="java.util.HashMap">
+        SELECT r.name AS "roleName", COUNT(i.id) AS total
+        FROM information i
+        LEFT JOIN role r ON r.id = i.roleId
+        GROUP BY r.name
+        ORDER BY total DESC
+    </select>
+
+    <!-- 课程按学年统计（课程数量、选课总人数） -->
+    <select id="countCourseByAcademicYear" resultType="java.util.HashMap">
+        SELECT c.academicYear AS "academicYear",
+               COUNT(c.id)      AS "courseCount",
+               COALESCE(SUM(c.selected), 0) AS "totalSelected"
+        FROM course c
+        GROUP BY c.academicYear
+        ORDER BY c.academicYear
+    </select>
+
+    <!-- 选课人数 Top N 课程列表（默认前10） -->
+    <select id="topCourseBySelected" resultType="java.util.HashMap">
+        SELECT c.courseName AS "courseName",
+               c.academicYear AS "academicYear",
+               c.selected   AS selected
+        FROM course c
+        ORDER BY c.selected DESC
+        LIMIT 10
+    </select>
+
+</mapper>

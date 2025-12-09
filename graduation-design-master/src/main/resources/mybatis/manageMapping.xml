@@ -46,6 +46,8 @@
         UPDATE college SET updateDate = #{updateDate}
         <if test="state!=null and state!=''">,state = #{state}</if>
         <if test="name!=null and name!=''">,name = #{name}</if>
+        <if test="teacherNum!=null">,teacherNum = #{teacherNum}</if>
+        <if test="studentNum!=null">,studentNum = #{studentNum}</if>
         WHERE id = #{id}
     </update>
 
@@ -55,12 +57,22 @@
     </insert>
 
     <select id="selectCollegeList" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT id,name,teacherNum,studentNum,state,createDate
+        SELECT id,
+               name,
+               teacherNum AS "teacherNum",
+               studentNum AS "studentNum",
+               state,
+               createDate AS "createDate"
         FROM college
     </select>
 
     <select id="selectInformationList" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT i.id id, i.title title, i."content" AS "content", i.publishDate publishDate, i.roleId roleId, r.name roleName
+        SELECT i.id id,
+               i.title title,
+               i."content" AS "content",
+               i.publishDate AS "publishDate",
+               i.roleId roleId,
+               r.name AS "roleName"
         FROM information i
         LEFT JOIN role r ON r.id = i.roleId
     </select>
@@ -83,6 +95,10 @@
         VALUES(#{id},#{title},#{content},#{publishDate},#{roleId})
     </insert>
 
+    <delete id="deleteInformation" parameterType="java.lang.String">
+        DELETE FROM information WHERE id=#{id}
+    </delete>
+
     <select id="selectTeacherList" parameterType="com.kzl.entity.Teacher" resultType="com.kzl.entity.Teacher">
         SELECT t.id,t.loginName,t.username,t.phone,t.email,t.roleId,t.collegeId,t.createDate,t.state,c.name collegeName
         FROM teacher t LEFT JOIN college c ON t.collegeId = c.id
@@ -96,6 +112,9 @@
         UPDATE teacher
         <trim prefix="set" suffixOverrides=",">
             <if test="state != null and state!=''">state=#{state},</if>
+            <if test="phone != null and phone!=''">phone=#{phone},</if>
+            <if test="email != null and email!=''">email=#{email},</if>
+            <if test="collegeId != null and collegeId!=''">collegeId=#{collegeId},</if>
         </trim>
         WHERE id=#{id}
     </update>
@@ -112,6 +131,9 @@
         UPDATE student
         <trim prefix="set" suffixOverrides=",">
             <if test="state != null and state!=''">state=#{state},</if>
+            <if test="phone != null and phone!=''">phone=#{phone},</if>
+            <if test="email != null and email!=''">email=#{email},</if>
+            <if test="collegeId != null and collegeId!=''">collegeId=#{collegeId},</if>
         </trim>
         WHERE id=#{id}
     </update>

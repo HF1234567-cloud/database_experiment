@@ -30,6 +30,9 @@ public class ManageController {
         ManageUser user = new ManageUser(id,loginName,username,null,roleId,null,null,roleName);
         List<Menu> menuList = manageService.queryUserRoleMenu(user.getRoleId());
         Information information = manageService.queryInformation(user.getRoleId());
+        if(information == null){
+            information = new Information();
+        }
         ModelAndView modelAndView = new ModelAndView("index");
         modelAndView.addObject("information",information);
         modelAndView.addObject("userType","1");
@@ -193,6 +196,18 @@ public class ManageController {
         return b?Result.createSuccess("添加资讯信息成功"):Result.createFail("添加资讯信息失败");
     }
 
+    //删除资讯信息
+    @ResponseBody
+    @RequestMapping("deleteInformation")
+    public Result deleteInformation(HttpServletRequest request){
+        String id = request.getParameter("id");
+        if(!StringUtils.hasText(id)){
+            return Result.createFail("参数id不能为空");
+        }
+        boolean b = manageService.deleteInformation(id);
+        return b?Result.createSuccess("删除资讯信息成功"):Result.createFail("删除资讯信息失败");
+    }
+
     //教师管理页面
     @RequestMapping("teacher")
     public ModelAndView teacher(HttpServletRequest request){
@@ -234,7 +249,8 @@ public class ManageController {
 
         ModelAndView modelAndView = new ModelAndView();
         List<Map> colleges = service.selectCollegeList();
-        modelAndView.setViewName(state?"manage/teacher":"redirect:/");
+        // 这里之前错误地指向了 manage/teacher，导致学生管理页面加载了教师管理模板
+        modelAndView.setViewName(state?"manage/student":"redirect:/");
         modelAndView.addObject("collegeList",colleges);
         return modelAndView;
     }
@@ -286,8 +302,16 @@ public class ManageController {
     //修改角色
     @ResponseBody
     @RequestMapping("updateRole")
-    public Result updateRole(@RequestBody Role role){
+    public Result updateRole(@RequestBody Role role, HttpServletRequest request){
         boolean b = manageService.updateRole(role);
+        if(b){
+            // 如果修改的是当前登录用户所属的角色，则刷新session中的菜单列表
+            ManageUser user = (ManageUser) request.getSession().getAttribute("user");
+            if(user != null && role.getId() != null && role.getId().equals(user.getRoleId())){
+                List<Menu> menuList = manageService.queryUserRoleMenu(user.getRoleId());
+                request.getSession().setAttribute("menuList", menuList);
+            }
+        }
         return b?Result.createSuccess("修改角色数据成功"):Result.createFail("修改角色数据失败");
     }
 

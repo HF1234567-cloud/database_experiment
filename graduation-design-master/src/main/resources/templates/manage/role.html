@@ -151,8 +151,11 @@
                 treeData[i].menus=treeData[i].children;
             }
             if(id != null){
+                // 立即给出保存中的反馈
+                layer.msg('正在保存', {icon: 16, shade: 0.1, time: 0});
                 updateRole(id,roleName,null,treeData);
             }else{
+                layer.msg('正在保存', {icon: 16, shade: 0.1, time: 0});
                 addRole(roleName,treeData)
             }
             document.getElementById("menu_box").style.display="none";
@@ -181,6 +184,7 @@
 
         //修改角色
         function updateRole(id,name,state,menuList) {
+
             var data = {
                 'id': id,
                 'name': name,
@@ -190,6 +194,7 @@
             data = JSON.stringify(data);
             $.ajax({
                 url: '/manage/updateRole',
+
                 method: 'post',
                 data: data,
                 contentType: "application/json;charset=utf-8",
@@ -197,12 +202,19 @@
                 dataType: 'text',
                 success: function (res) {
                     res = JSON.parse(res)
+                    // 关闭“正在保存”的loading
+                    layer.closeAll();
                     if(res.code == '201'){
                         layer.msg(res.data)
                     }else{
                         var message = res.data;
                         tableIns.reload();
-                        layer.msg(res.data)
+                        layer.msg(res.data);
+                        // 刷新当前页面，使左侧菜单根据最新角色菜单立即生效
+                        setTimeout(function () {
+                            location.reload();
+                        }, 400);
+
                     }
                 }
             });
@@ -210,6 +222,7 @@
 
         //添加角色
         function addRole(name,menuList) {
+
             console.log("添加角色 gogogo")
             var data = {
                 'name': name,
@@ -218,6 +231,7 @@
             data = JSON.stringify(data);
             $.ajax({
                 url: '/manage/addRole',
+
                 method: 'post',
                 data: data,
                 contentType: "application/json;charset=utf-8",
@@ -225,6 +239,8 @@
                 dataType: 'text',
                 success: function (res) {
                     res = JSON.parse(res)
+                    // 关闭“正在保存”的loading
+                    layer.closeAll();
                     if(res.code == '201'){
                         layer.msg(res.data)
                     }else{
@@ -235,6 +251,7 @@
                 }
             });
         }
+
     });
 </script>
 </html>
