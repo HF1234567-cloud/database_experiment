@@ -76,7 +76,8 @@
                     </div>
                 </div>
 
-                <!-- 表格区域：选课人数TopN & 资讯按展示端统计，同一行并列展示 -->
+               
+
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md6">
                         <fieldset class="layui-elem-field">
@@ -114,6 +115,27 @@
                         </fieldset>
                     </div>
                 </div>
+                 <!-- 表格区域：课程按学年统计、选课人数TopN & 资讯按展示端统计 -->
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md12">
+                        <fieldset class="layui-elem-field">
+                            <legend>课程按学年统计</legend>
+                            <div class="layui-field-box">
+                                <table class="layui-table">
+                                    <thead>
+                                    <tr>
+                                        <th>学年</th>
+                                        <th>课程数量</th>
+                                        <th>选课总人数</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="courseByYearBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -130,7 +152,7 @@
                 url: '/manage/statisticsData',
                 type: 'get',
                 success: function (res) {
-                    if(res && res.code == 200){
+                    if(res && res.code == 0){
                         var data = res.data || {};
                         // 顶部卡片
                         $('#studentTotal').text(data.studentTotal || 0);
