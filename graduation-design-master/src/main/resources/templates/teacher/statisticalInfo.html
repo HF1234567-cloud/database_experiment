@@ -49,7 +49,10 @@
     </div>
 </div>
 
+<!-- 引入 layui JS，保证头部导航下拉菜单可以正常工作 -->
+<script src="../../static/layui/layui.all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
 <script th:inline="javascript">
     // 图表1：选课学生学院分布统计（饼状图）
     var myChart = echarts.init(document.getElementById('main'));
