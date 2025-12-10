@@ -46,8 +46,6 @@
         UPDATE college SET updateDate = #{updateDate}
         <if test="state!=null and state!=''">,state = #{state}</if>
         <if test="name!=null and name!=''">,name = #{name}</if>
-        <if test="teacherNum!=null">,teacherNum = #{teacherNum}</if>
-        <if test="studentNum!=null">,studentNum = #{studentNum}</if>
         WHERE id = #{id}
     </update>
 

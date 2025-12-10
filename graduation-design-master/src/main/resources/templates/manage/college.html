@@ -64,7 +64,7 @@
             return stateBtn + editBtn;
         };
 
-        //弹出框-修改学院（名称、教师人数、学生人数）
+        //弹出框-修改学院（仅修改名称）
         window.editCollege = function(id, name, teacherNum, studentNum){
             var contentHtml = '' +
                 '<div class="layui-form" style="margin: 20px 20px 0 20px;">' +
@@ -77,13 +77,15 @@
                 '  <div class="layui-form-item">' +
                 '    <label class="layui-form-label">教师数量</label>' +
                 '    <div class="layui-input-block">' +
-                '      <input type="number" id="editTeacherNum" value="'+ (teacherNum||0) +'" autocomplete="off" class="layui-input" />' +
+                '      <input type="text" value="'+ (teacherNum||0) +'" readonly class="layui-input layui-disabled" style="background-color: #f5f5f5; cursor: not-allowed;" />' +
+                '      <div class="layui-form-mid layui-word-aux">教师数量由系统自动统计</div>' +
                 '    </div>' +
                 '  </div>' +
                 '  <div class="layui-form-item">' +
                 '    <label class="layui-form-label">学生数量</label>' +
                 '    <div class="layui-input-block">' +
-                '      <input type="number" id="editStudentNum" value="'+ (studentNum||0) +'" autocomplete="off" class="layui-input" />' +
+                '      <input type="text" value="'+ (studentNum||0) +'" readonly class="layui-input layui-disabled" style="background-color: #f5f5f5; cursor: not-allowed;" />' +
+                '      <div class="layui-form-mid layui-word-aux">学生数量由系统自动统计</div>' +
                 '    </div>' +
                 '  </div>' +
                 '</div>';
@@ -91,19 +93,15 @@
             layer.open({
                 type: 1,
                 title: '修改学院信息',
-                area: ['420px', '320px'],
+                area: ['460px', '360px'],
                 content: contentHtml,
                 btn: ['保存', '取消'],
                 yes: function(index){
                     var newName = $('#editCollegeName').val();
-                    var newTeacherNum = $('#editTeacherNum').val();
-                    var newStudentNum = $('#editStudentNum').val();
 
                     var data = {
                         'id': id,
-                        'name': newName,
-                        'teacherNum': newTeacherNum,
-                        'studentNum': newStudentNum
+                        'name': newName
                     };
                     data = JSON.stringify(data);
                     $.ajax({
