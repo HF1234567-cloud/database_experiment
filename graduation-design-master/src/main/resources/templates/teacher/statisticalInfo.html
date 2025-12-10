@@ -26,12 +26,11 @@
                 <!-- 标题 -->
                 <blockquote class="layui-elem-quote">选课统计</blockquote>
                 
-                <!-- 统计数据展示（循环渲染后端传递的TeacherStatis列表） -->
-                <blockquote class="layui-elem-quote course-column count-box" th:each="ths:${TeacherStatis}">
-                    <div>已完成课程统计</div>
+                <!-- 统计数据展示（循环渲染后端传递的CourseStatis列表，显示课程名称和人数） -->
+                <blockquote class="layui-elem-quote course-column count-box" th:each="ths:${CourseStatis}">
+                    <div>课程名称: <span th:text="${ths.name}"></span></div>
                     <hr>
                     <div class="count-tip">当前已选课程人数: <span class="count_num" th:text="${ths.count}"></span></div>
-                    <div class="count-tip">当前已选学员专业: <span class="collage_num" th:text="${ths.name}"></span></div>
                     <div class="clear"></div>
                 </blockquote>
                 
