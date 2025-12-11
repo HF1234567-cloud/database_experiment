@@ -10,6 +10,7 @@
         LEFT JOIN teacher t ON t.id=s.teacherId
         WHERE s.collegeId = #{collegeId}
         AND s.academicYear = #{courseAcademicYear}
+        AND s.state = '1'
     </select>
 
     <select id="selectStudentCourseRel" resultType="com.kzl.entity.StudentCourseRel">
@@ -36,6 +37,7 @@
         LEFT JOIN teacher t ON t.id=s.teacherId
         WHERE sc.studentId=#{studentId}
         AND s.academicYear = #{courseAcademicYear}
+        AND s.state = '1'
     </select>
 
     <select id="selectCourseAcademicYearByState" resultType="com.kzl.entity.CourseAcademicYear">

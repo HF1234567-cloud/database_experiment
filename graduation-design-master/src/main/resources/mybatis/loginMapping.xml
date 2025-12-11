@@ -17,8 +17,7 @@
         SELECT u.id,u.studentNumber,u.username,u.password,u.roleId,u.createDate,u.collegeId,r.name roleName
         FROM student u
         LEFT JOIN role r ON u.roleId=r.id
-        WHERE u.state = '1'
-        AND u.studentNumber = #{studentNumber}
+        WHERE u.studentNumber = #{studentNumber}
         AND u.password = #{password}
     </select>
 
@@ -26,8 +25,7 @@
         SELECT u.id,u.loginName,u.username,u.password,u.roleId,u.createDate,r.name roleName
         FROM teacher u
         LEFT JOIN role r ON u.roleId=r.id
-        WHERE u.state = '1'
-        AND u.loginName = #{loginName}
+        WHERE u.loginName = #{loginName}
         AND u.password = #{password}
     </select>
 </mapper>
