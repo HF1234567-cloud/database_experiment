@@ -5,7 +5,9 @@ import com.kzl.service.StudentService;
 import com.kzl.service.TeacherService;
 import com.kzl.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -56,12 +58,22 @@ public class StudentController {
     @ResponseBody
     @RequestMapping("courseSelection")
     public Result courseSelection(@RequestBody StudentCourseRel studentCourseRel){
-        boolean b = studentService.updateStudentCourseRel(studentCourseRel);
-        if(!b){
-            return Result.createSuccess("当前课程无法选择!!! <br> 选修时间已过或可选人数不足");
+        try {
+            boolean success = studentService.updateStudentCourseRel(studentCourseRel);
+            if(!success){
+                return buildFailResult("当前课程无法选择，选修时间已过或人数已满");
+            }
+            return Result.createSuccess("选课成功");
+        } catch (IllegalStateException ex) {
+            return buildFailResult(ex.getMessage());
+        } catch (DataAccessException ex) {
+            String rootMessage = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+            return buildFailResult(resolvePermissionMessage(rootMessage));
+        } catch (Exception ex) {
+            return buildFailResult("选课失败，请稍后再试");
         }
-        return Result.createSuccess("选课成功");
     }
+
 
     @ResponseBody
     @RequestMapping("courseList")
@@ -112,6 +124,31 @@ public class StudentController {
         return modelAndView;
     }
 
+    private String resolvePermissionMessage(String detail){
+        if(detail == null){
+            return "选课失败，请联系管理员";
+        }
+        if(detail.contains("STUDENT_DISABLED")){
+            return "该学生已被禁用，请联系管理员获取权限";
+        }
+        if(detail.contains("TEACHER_DISABLED")){
+            return "授课教师已被禁用，请联系管理员获取权限";
+        }
+        if(detail.contains("STUDENT_NOT_FOUND")){
+            return "未找到学生信息，请联系管理员获取权限";
+        }
+        if(detail.contains("TEACHER_NOT_FOUND")){
+            return "未找到授课教师，请联系管理员获取权限";
+        }
+        return detail;
+    }
+
+    private Result buildFailResult(String message){
+        Result result = Result.createFail(message);
+        result.setData(message,0);
+        return result;
+    }
+
     private boolean judgeUserLoginState(HttpServletRequest request){
         Student user = (Student) request.getSession().getAttribute("user");
         List<Menu> menus = (List) request.getSession().getAttribute("menuList");
@@ -121,3 +158,4 @@ public class StudentController {
         return true;
     }
 }
+

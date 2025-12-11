@@ -48,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public boolean updateStudentCourseRel(StudentCourseRel studentCourseRel) {
+        validateStudentAndTeacherState(studentCourseRel);
         //查询当前时间是否可以选择课程
         Course course = studentMapper.selectCourseByPeriodTime(studentCourseRel.getCourseId(),new Date());
         if(course == null){
@@ -76,6 +77,7 @@ public class StudentServiceImpl implements StudentService {
         studentMapper.updateCourse(course2);
         return b;
     }
+
 
     @Override
     public List<Course> selectCourseList(String id) {
@@ -128,4 +130,18 @@ public class StudentServiceImpl implements StudentService {
         return studentMapper.updateStudentPassword(id, newPassword) > 0;
     }
 
+    private void validateStudentAndTeacherState(StudentCourseRel studentCourseRel) {
+        String studentState = studentMapper.selectStudentState(studentCourseRel.getStudentId());
+        if(studentState == null){
+            throw new IllegalStateException("未找到学生信息，请联系管理员获取权限");
+        }
+        if(!"1".equals(studentState)){
+            throw new IllegalStateException("该学生已被禁用，请联系管理员获取权限");
+        }
+        String teacherState = studentMapper.selectTeacherStateByCourseId(studentCourseRel.getCourseId());
+        if(teacherState != null && !"1".equals(teacherState)){
+            throw new IllegalStateException("授课教师已被禁用，请联系管理员获取权限");
+        }
+    }
 }
+

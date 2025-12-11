@@ -32,7 +32,12 @@ public interface StudentMapper {
 
     Course selectCourseById(String courseId);
 
+    String selectStudentState(String studentId);
+
+    String selectTeacherStateByCourseId(String courseId);
+
     int updateCourse(Course course2);
+
 
     Student selectStudentById(String id);
 

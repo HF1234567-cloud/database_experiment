@@ -86,10 +86,22 @@
         WHERE id=#{courseId}
     </select>
 
+    <select id="selectStudentState" resultType="java.lang.String">
+        SELECT state FROM student WHERE id = #{studentId}
+    </select>
+
+    <select id="selectTeacherStateByCourseId" resultType="java.lang.String">
+        SELECT t.state
+        FROM course c
+        LEFT JOIN teacher t ON t.id = c.teacherId
+        WHERE c.id = #{courseId}
+    </select>
+
     <update id="updateCourse"  parameterType="com.kzl.entity.Course">
         UPDATE course SET selected = selected + #{useNumber}
         WHERE id=#{id}
     </update>
+
 
     <select id="selectStudentById" resultType="com.kzl.entity.Student">
         SELECT s.id, s.studentnumber AS "studentNumber", s.username, s.phone, s.email, s.roleid AS "roleId", s.collegeid AS "collegeId", 
