@@ -135,13 +135,18 @@
                         layer.msg("注册成功，请登录");
                         window.location.href='/';
                     }else{
-                        layer.msg(res.message);
-                        layer.msg("注册出错")
+                        console.log('register fail:', res);
+                        layer.msg(res.message || "注册失败");
                     }
                 },
                 error:function (erro) {
-                    layer.msg(res.message);
-                    window.location.href="/register?type="+type;
+                    console.error('ajax error:', erro);
+                    var msg = "请求出错，请稍后重试";
+                    if (erro && erro.responseJSON && erro.responseJSON.message) {
+                        msg = erro.responseJSON.message;
+                    }
+                    layer.msg(msg);
+                    //window.location.href="/register?type="+type;
                 }
             })
         });
