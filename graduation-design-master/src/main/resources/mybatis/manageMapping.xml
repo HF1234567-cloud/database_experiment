@@ -102,7 +102,7 @@
         FROM teacher t LEFT JOIN college c ON t.collegeId = c.id
         WHERE 1=1
         <if test="collegeId!=null and collegeId!=''">AND t.collegeId = #{collegeId}</if>
-        <if test="username!=null and username!=''">AND t.username = #{username}</if>
+        <if test="username!=null and username!=''">AND t.username LIKE concat('%', #{username}, '%')</if>
     </select>
 
 
@@ -122,7 +122,7 @@
         FROM student s LEFT JOIN college c ON s.collegeId = c.id
         WHERE 1=1
         <if test="collegeId!=null and collegeId!=''">AND s.collegeId = #{collegeId}</if>
-        <if test="username!=null and username!=''">AND s.username = #{username}</if>
+        <if test="username!=null and username!=''">AND s.username LIKE concat('%', #{username}, '%')</if>
     </select>
 
     <update id="updateStudent" parameterType="com.kzl.entity.Student" >
